@@ -40,6 +40,7 @@ final class AppCoordinator {
     switch e {
     case .wheelOpen(let p):
       overlay.openWheel(at: p)
+      if !settings.muted { sound.warmUp() }
     case .wheelMove(let p):
       if overlay.moveWheel(to: p) && settings.tickSound && !settings.muted {
         sound.play(PingCatalog.tickSound, volume: Float(settings.volume) / 100)
