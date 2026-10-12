@@ -61,20 +61,26 @@ enum Textures {
     named("contextwheel_atlas")?.cropping(to: CGRect(x: r.x, y: r.y, width: r.w, height: r.h))
   }
 
-  /// A white/grey texture recoloured with `rgb`, keeping its alpha and brightness.
+  /// A glow texture (white on black, drawn additively by the game) recoloured with `rgb`.
+  /// Brightness becomes opacity, so the black background disappears.
   static func tinted(_ name: String, _ rgb: UInt32) -> CGImage? {
     let key = "\(name)#\(rgb)"
     if let c = cache[key] { return c }
     guard let src = named(name) else { return nil }
-    let size = CGSize(width: src.width, height: src.height)
+    let w = src.width, h = src.height
+    guard let grey = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                               space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue) else { return nil }
+    grey.draw(src, in: CGRect(x: 0, y: 0, width: w, height: h))
+    guard let mask = grey.makeImage() else { return nil }
+    let size = CGSize(width: w, height: h)
     let out = Drawing.image(size: size, scale: 1) { ctx in
       let rect = CGRect(origin: .zero, size: size)
-      Drawing.draw(src, in: rect, ctx)
-      ctx.setBlendMode(.multiply)
+      // Undo the y-down flip so the mask isn't drawn upside down.
+      ctx.translateBy(x: 0, y: size.height)
+      ctx.scaleBy(x: 1, y: -1)
+      ctx.clip(to: rect, mask: mask)
       ctx.setFillColor(Drawing.color(rgb))
       ctx.fill(rect)
-      ctx.setBlendMode(.destinationIn)
-      Drawing.draw(src, in: rect, ctx)
     }
     cache[key] = out
     return out
