@@ -16,8 +16,11 @@ final class SoundPlayer: @unchecked Sendable {
   private var buffers: [String: AVAudioPCMBuffer] = [:]
   private var players: [AVAudioPlayerNode] = []
   private var busy = Set<Int>()
+  /// Bumped each time a voice is (re)used, so a late completion from an earlier sound can't free it.
+  private var voiceGeneration = [Int](repeating: 0, count: SoundPlayer.voices)
   /// Bumped whenever an idle stop is scheduled or cancelled; a pending stop runs only if it still matches.
   private var idleGeneration = 0
+  private var configObserver: NSObjectProtocol?
 
   init(names: [String]) {
     var format: AVAudioFormat?
@@ -29,6 +32,11 @@ final class SoundPlayer: @unchecked Sendable {
         NSLog("ping-signals: sound \(name) failed to load")
         continue
       }
+      // Every voice is connected with one format, so every buffer must share it.
+      if let format, file.processingFormat != format {
+        NSLog("ping-signals: sound \(name) skipped: format \(file.processingFormat) differs from \(format)")
+        continue
+      }
       buffers[name] = buf
       format = format ?? file.processingFormat
     }
@@ -38,6 +46,17 @@ final class SoundPlayer: @unchecked Sendable {
       engine.connect(p, to: engine.mainMixerNode, format: format)
       players.append(p)
     }
+    // Output device or sample rate changed: the system has stopped the engine, and stopped players
+    // may never report their buffers as played back. Free every voice.
+    configObserver = NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChange,
+                                                            object: engine, queue: nil) { [weak self] _ in
+      guard let self else { return }
+      self.queue.async { self.resetVoices() }
+    }
+  }
+
+  deinit {
+    if let configObserver { NotificationCenter.default.removeObserver(configObserver) }
   }
 
   /// Starts the engine ahead of a likely sound (a wheel just opened) without playing anything.
@@ -70,19 +89,31 @@ final class SoundPlayer: @unchecked Sendable {
           startEngine() else { return }
     idleGeneration += 1           // cancels a pending idle stop
     busy.insert(i)
+    voiceGeneration[i] += 1
+    let g = voiceGeneration[i]
     let p = players[i]
     p.volume = volume
     p.scheduleBuffer(buf, at: nil, options: [], completionCallbackType: .dataPlayedBack) { [weak self] _ in
       guard let self else { return }
-      self.queue.async { self.finished(i) }
+      self.queue.async { self.finished(i, generation: g) }
     }
     p.play()
   }
 
-  private func finished(_ i: Int) {
+  private func finished(_ i: Int, generation g: Int) {
+    guard voiceGeneration[i] == g, busy.contains(i) else { return }
     players[i].stop()
     busy.remove(i)
     if busy.isEmpty { scheduleIdleStop() }
+  }
+
+  private func resetVoices() {
+    for (i, p) in players.enumerated() {
+      p.stop()
+      voiceGeneration[i] += 1
+    }
+    busy.removeAll()
+    scheduleIdleStop()
   }
 
   private func scheduleIdleStop() {
