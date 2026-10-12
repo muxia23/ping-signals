@@ -54,6 +54,8 @@ final class WheelLayer {
     CATransaction.commit()
   }
 
+  var isOpen: Bool { !root.isHidden }
+
   /// Returns true when a different slice (not the dead zone) became highlighted.
   @discardableResult
   func move(to p: CGPoint) -> Bool {

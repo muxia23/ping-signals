@@ -11,7 +11,9 @@ enum ClassicPingAnimator {
   /// Icon pixels → points: an icon 128 px wide is 0.55 × size wide.
   static let iconScale: CGFloat = 0.55 / 128
 
-  static func spawn(_ def: PingDef, at p: CGPoint, size s: CGFloat, duration dur: CFTimeInterval, in parent: CALayer) -> CALayer {
+  /// `scale`: the panel screen's backingScaleFactor, applied to every layer created.
+  static func spawn(_ def: PingDef, at p: CGPoint, size s: CGFloat, duration dur: CFTimeInterval,
+                    scale: CGFloat, in parent: CALayer) -> CALayer {
     let root = CALayer()
     root.position = p
     root.bounds = .zero
@@ -50,6 +52,7 @@ enum ClassicPingAnimator {
     }
 
     guard let name = def.art.first, let img = Textures.trimmedVertically(name) else {
+      ModernPingAnimator.setContentsScale(scale, root)
       parent.addSublayer(root)
       return root
     }
@@ -82,6 +85,7 @@ enum ClassicPingAnimator {
     bob.beginTime = CACurrentMediaTime() + 0.3
     icon.add(bob, forKey: "bob")
 
+    ModernPingAnimator.setContentsScale(scale, root)
     parent.addSublayer(root)
     return root
   }

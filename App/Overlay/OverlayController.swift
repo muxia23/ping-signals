@@ -3,6 +3,7 @@ import QuartzCore
 import PingCore
 
 /// One transparent, click-through panel per screen, above fullscreen apps, on every Space.
+/// A panel is on screen only while it shows a wheel or a ping; otherwise it stays allocated but ordered out.
 @MainActor
 final class OverlayController {
   static let maxPings = 60
@@ -11,11 +12,13 @@ final class OverlayController {
   private final class Panel {
     let window: NSPanel
     let screenFrame: CGRect
+    let backingScale: CGFloat
     let wheel = WheelLayer()
     let pings = CALayer()
 
     init(screen: NSScreen) {
       screenFrame = screen.frame
+      backingScale = screen.backingScaleFactor
       window = NSPanel(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
       window.isOpaque = false
       window.backgroundColor = .clear
@@ -29,7 +32,15 @@ final class OverlayController {
       view.layer?.addSublayer(wheel.root)
       window.contentView = view
       window.setFrame(screen.frame, display: false)
-      window.orderFrontRegardless()
+    }
+
+    func show() {
+      if !window.isVisible { window.orderFrontRegardless() }
+    }
+
+    /// Orders the panel out once it shows neither a wheel nor a ping.
+    func hideIfIdle() {
+      if !wheel.isOpen && (pings.sublayers?.isEmpty ?? true) { window.orderOut(nil) }
     }
   }
 
@@ -62,8 +73,9 @@ final class OverlayController {
 
   private func panel(forGlobal g: GesturePoint) -> (Panel, CGPoint)? {
     let gp = CGPoint(x: g.x, y: g.y)
-    let a = ScreenMath.appKitPoint(fromGlobal: gp, primaryHeight: primaryHeight)
-    guard let p = panels.first(where: { $0.screenFrame.contains(a) }) ?? panels.first else { return nil }
+    let ph = primaryHeight
+    guard let p = panels.first(where: { ScreenMath.globalRect(ofScreenFrame: $0.screenFrame, primaryHeight: ph).contains(gp) })
+            ?? panels.first else { return nil }
     return (p, ScreenMath.localPoint(fromGlobal: gp, screenFrame: p.screenFrame, primaryHeight: primaryHeight))
   }
 
@@ -74,6 +86,7 @@ final class OverlayController {
   func openWheel(at g: GesturePoint) {
     guard let (p, l) = panel(forGlobal: g) else { return }
     wheelPanel = p
+    p.show()
     p.wheel.open(at: l)
   }
 
@@ -89,6 +102,7 @@ final class OverlayController {
     let center = p.wheel.center
     let slice = p.wheel.release(at: local(g, in: p))
     wheelPanel = nil
+    p.hideIfIdle()
     guard let slice else { return nil }
     let a = CGPoint(x: center.x + p.screenFrame.minX, y: center.y + p.screenFrame.minY)
     let gc = ScreenMath.globalPoint(fromAppKit: a, primaryHeight: primaryHeight)
@@ -97,18 +111,21 @@ final class OverlayController {
 
   func cancelWheel() {
     wheelPanel?.wheel.close()
+    wheelPanel?.hideIfIdle()
     wheelPanel = nil
   }
 
   func spawnPing(_ def: PingDef, style: WheelStyle, at g: GesturePoint, size: CGFloat, duration: Double) {
     guard let (p, l) = panel(forGlobal: g) else { return }
     while (p.pings.sublayers?.count ?? 0) >= Self.maxPings { p.pings.sublayers?.first?.removeFromSuperlayer() }
+    p.show()
     let layer = style == .classic
-      ? ClassicPingAnimator.spawn(def, at: l, size: size, duration: duration, in: p.pings)
-      : ModernPingAnimator.spawn(def, at: l, size: size, duration: duration, in: p.pings)
+      ? ClassicPingAnimator.spawn(def, at: l, size: size, duration: duration, scale: p.backingScale, in: p.pings)
+      : ModernPingAnimator.spawn(def, at: l, size: size, duration: duration, scale: p.backingScale, in: p.pings)
     Task { @MainActor in
       try? await Task.sleep(for: .seconds(duration + 0.15))
       layer.removeFromSuperlayer()
+      p.hideIfIdle()
     }
   }
 

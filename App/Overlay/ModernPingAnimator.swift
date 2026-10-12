@@ -5,7 +5,9 @@ import PingCore
 /// League's current ping effect, after lolPing's overlay.css.
 @MainActor
 enum ModernPingAnimator {
-  static func spawn(_ def: PingDef, at p: CGPoint, size s: CGFloat, duration dur: CFTimeInterval, in parent: CALayer) -> CALayer {
+  /// `scale`: the panel screen's backingScaleFactor, applied to every layer created.
+  static func spawn(_ def: PingDef, at p: CGPoint, size s: CGFloat, duration dur: CFTimeInterval,
+                    scale: CGFloat, in parent: CALayer) -> CALayer {
     let color = Drawing.color(def.color)
     let root = CALayer()
     root.position = p
@@ -136,8 +138,15 @@ enum ModernPingAnimator {
       pop.add(pg, forKey: "pop")
     }
 
+    setContentsScale(scale, root)
     parent.addSublayer(root)
     return root
+  }
+
+  /// Sets `contentsScale` on `layer` and everything below it.
+  static func setContentsScale(_ scale: CGFloat, _ layer: CALayer) {
+    layer.contentsScale = scale
+    layer.sublayers?.forEach { setContentsScale(scale, $0) }
   }
 
   static func keyframes(_ path: String, _ values: [Double], _ times: [Double], _ dur: CFTimeInterval) -> CAKeyframeAnimation {

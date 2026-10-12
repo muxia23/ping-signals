@@ -13,6 +13,7 @@ final class AppCoordinator {
   private var tap: EventTap!
   private var menu: MenuBarController!
   private var tapRetry: Timer?
+  private var screenObserver: NSObjectProtocol?
 
   init() {
     settings = store.load()
@@ -25,6 +26,11 @@ final class AppCoordinator {
     machine.fullscreenProbe = { x, y in MainActor.assumeIsolated { FullscreenProbe.isFullscreen(x: x, y: y) } }
     tap.apply(machine.setConfig(settings.gestureConfig(enabled: settings.enabledOnStart)))
     refreshWheelArt()
+    // A new screen may have a different backing scale: re-render the wheel bitmaps.
+    screenObserver = NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification,
+                                                            object: nil, queue: .main) { [weak self] _ in
+      MainActor.assumeIsolated { self?.refreshWheelArt() }
+    }
     refreshMenu()
     tap.onPermissionLost = { [weak self] in self?.permissionLost() }
     armTap(prompt: true)

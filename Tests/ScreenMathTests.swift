@@ -24,4 +24,12 @@ import Testing
   @Test func globalRectOfScreen() {
     #expect(ScreenMath.globalRect(ofScreenFrame: second, primaryHeight: primaryHeight) == CGRect(x: 1440, y: -180, width: 1920, height: 1080))
   }
+
+  @Test func topRowOfSecondScreenIsInsideItsGlobalRect() {
+    // The top pixel row of the second screen is global y = -180. In AppKit space that is y = 1080 = maxY,
+    // which an AppKit-frame `contains` test excludes; the global-rect test includes it.
+    let top = CGPoint(x: 1500, y: -180)
+    #expect(ScreenMath.globalRect(ofScreenFrame: second, primaryHeight: primaryHeight).contains(top))
+    #expect(!second.contains(ScreenMath.appKitPoint(fromGlobal: top, primaryHeight: primaryHeight)))
+  }
 }
