@@ -137,7 +137,25 @@ final class AppCoordinator {
     apply(new)
   }
 
-  private func openSettings() {}
+  private lazy var settingsWindow: SettingsWindowController = {
+    let model = SettingsModel(settings: settings,
+      apply: { [weak self] in self?.apply($0) },
+      tryAction: { [weak self] c, id in self?.tryAction(c, id) },
+      setRecording: { [weak self] on in self?.setRecording(on) })
+    onSettingsChanged = { [weak model] s in model?.settings = s }
+    return SettingsWindowController(model: model)
+  }()
+
+  private func openSettings() { settingsWindow.show() }
+
+  /// Key recording must see the keys the gesture machine would otherwise act on (e.g. the pause shortcut).
+  private func setRecording(_ on: Bool) { tap.apply(machine.setSuspended(on)) }
+
+  private func tryAction(_ c: ActionConfig, _ id: PingID) {
+    runner.run(c, signal: PingSignal(ping: id, style: settings.style, point: overlay.mouseScreenCenter(),
+                                     frontApp: NSWorkspace.shared.frontmostApplication?.bundleIdentifier,
+                                     time: Date(), source: .preview))
+  }
 
   private func preview(_ id: PingID) {
     emitSignal(id, at: overlay.mouseScreenCenter(), source: .preview)
