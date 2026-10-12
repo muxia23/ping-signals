@@ -115,7 +115,7 @@ final class AppCoordinator {
   }
 
   private func preview(_ id: PingID) {
-    emitSignal(id, at: overlay.mouseScreenCenter(), source: .click)
+    emitSignal(id, at: overlay.mouseScreenCenter(), source: .preview)
   }
 
   private func refreshWheelArt() {

@@ -2,7 +2,8 @@ import Foundation
 
 /// One placed ping. v1 only animates it; later handlers give each ping a meaning (e.g. "?" logs a question).
 public struct PingSignal: Equatable, Sendable {
-  public enum Source: Equatable, Sendable { case wheel, click }
+  /// `.preview`: placed from the menu bar to look at it; never triggers an action.
+  public enum Source: Equatable, Sendable { case wheel, click, preview }
   public let ping: PingID
   public let style: WheelStyle
   /// Global coordinates (primary screen's top-left origin, y down).
