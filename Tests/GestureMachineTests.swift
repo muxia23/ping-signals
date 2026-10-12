@@ -176,6 +176,24 @@ private func opened(_ o: GestureOutput) -> Bool {
     #expect(!r.swallow)
     #expect(clickPoint(r) == nil)
     #expect(!m.onEvent(mu(.left, 100, 100)).swallow)
+    let up = m.onEvent(ku(ALT))
+    #expect(!up.swallow && up.replays.isEmpty)
+  }
+
+  @Test func plainAltTapIsUntouched() {
+    let m = GestureMachine()
+    #expect(!m.onEvent(kd(ALT)).swallow)
+    let r = m.onEvent(ku(ALT))
+    #expect(!r.swallow && r.replays.isEmpty && r.emits.isEmpty)
+  }
+
+  @Test func dragThresholdIsStrictlyGreater() {
+    let m = GestureMachine()
+    _ = m.onEvent(kd(ALT))
+    _ = m.onEvent(md(.left, 100, 100))
+    #expect(m.onEvent(mv(108, 100)).emits.isEmpty)  // exactly 8 px: still a click
+    #expect(m.state == .pending)
+    #expect(opened(m.onEvent(mv(109, 100))))       // 9 px opens the wheel
   }
 
   @Test func commandTabClicksPassAndSyncClearsFlag() {
