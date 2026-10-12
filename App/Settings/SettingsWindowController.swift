@@ -14,7 +14,10 @@ final class SettingsWindowController {
       let tabs = NSTabViewController()
       tabs.tabStyle = .toolbar
       func add(_ view: some View, _ title: String, _ symbol: String) {
-        let item = NSTabViewItem(viewController: NSHostingController(rootView: view.frame(width: 620, height: 520)))
+        let vc = NSHostingController(rootView: view.frame(width: 620, height: 520))
+        vc.sizingOptions = [.preferredContentSize]   // the window takes each tab's size
+        vc.title = title                             // the toolbar tab controller shows it as the window title
+        let item = NSTabViewItem(viewController: vc)
         item.label = title
         item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: title)
         tabs.addTabViewItem(item)
