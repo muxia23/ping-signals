@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 
+/// Standard macOS settings window: icon tabs in the toolbar, the title follows the selected tab.
 @MainActor
 final class SettingsWindowController {
   let model: SettingsModel
@@ -10,9 +11,22 @@ final class SettingsWindowController {
 
   func show() {
     if window == nil {
-      let w = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(model: model)))
-      w.title = String(localized: "ping-signals Settings")
+      let tabs = NSTabViewController()
+      tabs.tabStyle = .toolbar
+      func add(_ view: some View, _ title: String, _ symbol: String) {
+        let item = NSTabViewItem(viewController: NSHostingController(rootView: view.frame(width: 620, height: 520)))
+        item.label = title
+        item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: title)
+        tabs.addTabViewItem(item)
+      }
+      add(TriggerTab(model: model), String(localized: "Trigger"), "cursorarrow.click.2")
+      add(WheelTab(model: model), String(localized: "Wheel"), "circle.grid.cross")
+      add(PingsSoundTab(model: model), String(localized: "Pings & Sound"), "speaker.wave.2")
+      add(ActionsTab(model: model), String(localized: "Actions"), "bolt")
+      add(GeneralTab(model: model), String(localized: "General"), "gearshape")
+      let w = NSWindow(contentViewController: tabs)
       w.styleMask = [.titled, .closable]
+      w.toolbarStyle = .preference
       w.isReleasedWhenClosed = false
       w.center()
       window = w

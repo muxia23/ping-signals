@@ -5,11 +5,16 @@ struct WheelTab: View {
   @Bindable var model: SettingsModel
 
   var body: some View {
-    HStack(spacing: 28) {
-      styleCard(.classic, title: "Classic (2022)", subtitle: "4 pings")
-      styleCard(.modern, title: "Modern", subtitle: "8 pings")
+    // A grouped form like the other tabs, so every tab has the same background.
+    Form {
+      HStack(spacing: 28) {
+        styleCard(.classic, title: "Classic (2022)", subtitle: "4 pings")
+        styleCard(.modern, title: "Modern", subtitle: "8 pings")
+      }
+      .frame(maxWidth: .infinity)
+      .padding(.vertical, 12)
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .formStyle(.grouped)
   }
 
   /// A picture of each wheel, so the difference is obvious; clicking one selects it.
