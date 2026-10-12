@@ -15,6 +15,7 @@ final class AppCoordinator {
   private var tap: EventTap!
   private var runner: ActionRunner!
   private var menu: MenuBarController!
+  private let onboarding = OnboardingWindowController()
   private var tapRetry: Timer?
   private var screenObserver: NSObjectProtocol?
 
@@ -25,7 +26,8 @@ final class AppCoordinator {
       toggleEnabled: { [weak self] in self?.toggleEnabled() },
       setStyle: { [weak self] s in self?.setStyle(s) },
       preview: { [weak self] id in self?.preview(id) },
-      openSettings: { [weak self] in self?.openSettings() }))
+      openSettings: { [weak self] in self?.openSettings() },
+      showOnboarding: { [weak self] in self?.onboarding.show() }))
     bus.register(PingEffectHandler(overlay: overlay, sound: sound) { [weak self] in self?.settings ?? Settings() })
     runner = ActionRunner(retreat: RetreatAction(), todoPanel: TodoPanelAction(panel: todoPanel),
                           claude: ClaudeQuickEntryAction())
@@ -40,13 +42,19 @@ final class AppCoordinator {
     }
     refreshMenu()
     tap.onPermissionLost = { [weak self] in self?.permissionLost() }
-    armTap(prompt: true)
+    armTap(showGuide: true)
   }
 
   // MARK: Event tap lifecycle
 
-  private func armTap(prompt: Bool) {
-    gate.waitForPermission(prompt: prompt) { [weak self] in self?.startTap() }
+  /// `showGuide`: open the onboarding window while waiting (not when permission was revoked later:
+  /// the menu's "Grant Accessibility…" item opens it then).
+  private func armTap(showGuide: Bool) {
+    if showGuide && !gate.isTrusted { onboarding.show() }
+    gate.waitForPermission { [weak self] in
+      self?.onboarding.close()
+      self?.startTap()
+    }
   }
 
   /// Starts the tap; if that fails although permission is granted, retries once a second.
@@ -55,7 +63,7 @@ final class AppCoordinator {
     tapRetry = nil
     refreshMenu()
     guard !tap.start() else { return }
-    guard gate.isTrusted else { armTap(prompt: false); return }
+    guard gate.isTrusted else { armTap(showGuide: false); return }
     NSLog("ping-signals: event tap failed to start; retrying")
     let t = Timer(timeInterval: 1, repeats: false) { [weak self] _ in
       MainActor.assumeIsolated { self?.startTap() }
@@ -71,7 +79,7 @@ final class AppCoordinator {
     _ = machine.setSuspended(false)
     overlay.cancelWheel()
     refreshMenu()
-    armTap(prompt: false)
+    armTap(showGuide: false)
   }
 
   // MARK: Gesture output

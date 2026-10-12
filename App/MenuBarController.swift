@@ -8,6 +8,7 @@ final class MenuBarController: NSObject {
     var setStyle: (WheelStyle) -> Void
     var preview: (PingID) -> Void
     var openSettings: () -> Void
+    var showOnboarding: () -> Void
   }
 
   private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -24,7 +25,7 @@ final class MenuBarController: NSObject {
     item.button?.appearsDisabled = !enabled || needsPermission
     let menu = NSMenu()
     if needsPermission {
-      menu.addItem(entry("需要「辅助功能」权限… / Grant Accessibility…") { AccessibilityGate.openSettings() })
+      menu.addItem(entry("需要「辅助功能」权限… / Grant Accessibility…") { [actions] in actions.showOnboarding() })
       menu.addItem(.separator())
     }
     let toggle = entry(enabled ? "暂停 / Pause" : "启用 / Enable") { [actions] in actions.toggleEnabled() }
