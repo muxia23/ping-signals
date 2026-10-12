@@ -6,6 +6,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 LOLPING="${LOLPING:-$HOME/sandbox/lolping-fork/assets}"
 CLASSIC=reference/classic-12.21/world
+# The assets are already committed; this is only needed to re-import. Check before deleting anything.
+if [ ! -d "$LOLPING" ]; then
+  echo "lolPing assets not found at $LOLPING" >&2
+  echo "Clone https://github.com/darrenprx/lolPing and run with LOLPING=<clone>/assets" >&2
+  exit 1
+fi
 TEX=App/Resources/Textures
 SND=App/Resources/Sounds
 rm -rf "$TEX" "$SND"
