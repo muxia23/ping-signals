@@ -65,11 +65,6 @@
 "Restart Now" = "Restart Now";
 "Version" = "Version";
 "Press keys…" = "Press keys…";
-"Style" = "Style";
-"⌥ + click: %@" = "⌥ + click: %@";
-"The classic wheel is fixed." = "The classic wheel is fixed.";
-"Placed by trigger key + click" = "Placed by trigger key + click";
-"Choosing a ping that's already on the wheel swaps the two slots. The centre is the trigger-key + click ping." = "Choosing a ping that's already on the wheel swaps the two slots. The centre is the trigger-key + click ping.";
 "Restore Defaults" = "Restore Defaults";
 "Shortcuts and shell commands receive the ping and the front app, window and URL (PING_ID, FRONT_APP, FRONT_URL…)." = "Shortcuts and shell commands receive the ping and the front app, window and URL (PING_ID, FRONT_APP, FRONT_URL…).";
 "Modern wheel only" = "Modern wheel only";
@@ -85,5 +80,5 @@
 "2. Turn on ping-signals under Accessibility." = "2. Turn on ping-signals under Accessibility.";
 "3. Come back: this window closes by itself." = "3. Come back: this window closes by itself.";
 "Open System Settings" = "Open System Settings";
-"4 fixed pings" = "4 fixed pings";
-"8 pings, editable" = "8 pings, editable";
+"4 pings" = "4 pings";
+"8 pings" = "8 pings";

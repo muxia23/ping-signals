@@ -13,7 +13,7 @@ enum SettingsPreview {
       edit(&s)
       return SettingsModel(settings: s, apply: { _ in }, tryAction: { _, _ in }, setRecording: { _ in })
     }
-    let size = NSSize(width: 620, height: 600)
+    let size = NSSize(width: 620, height: 560)
     write(TriggerTab(model: model()), size, dir, "1-trigger")
     write(WheelTab(model: model()), size, dir, "2-wheel-classic")
     write(WheelTab(model: model { $0.style = .modern }), size, dir, "2-wheel-modern")
