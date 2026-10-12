@@ -13,6 +13,8 @@ final class EventTap {
   private var source: CFRunLoopSource?
   private var flags: UInt64 = 0
   private var watchdog: Timer?
+  /// Called (after the tap has stopped itself) when Accessibility permission is revoked while running.
+  var onPermissionLost: (() -> Void)?
 
   init(machine: GestureMachine, onEmit: @escaping (GestureEmit) -> Void) {
     self.machine = machine
@@ -46,6 +48,8 @@ final class EventTap {
     let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
       MainActor.assumeIsolated {
         guard let self else { return }
+        self.checkHealth()
+        guard self.tap != nil else { return }
         self.resync()
         self.apply(self.machine.tick(nowMs: Self.nowMs()))
       }
@@ -63,6 +67,19 @@ final class EventTap {
     if let t = tap { CFMachPortInvalidate(t) }
     tap = nil
     source = nil
+  }
+
+  /// Revoked permission: stop and tell the owner. A tap the system disabled without telling us
+  /// (no tapDisabled event arrived): turn it back on.
+  private func checkHealth() {
+    guard let t = tap else { return }
+    if !AXIsProcessTrusted() {
+      stop()
+      onPermissionLost?()
+    } else if !CGEvent.tapIsEnabled(tap: t) {
+      CGEvent.tapEnable(tap: t, enable: true)
+      resync()
+    }
   }
 
   /// Runs a machine call made outside the tap (config change, enable/disable) through the same output path.

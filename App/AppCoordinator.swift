@@ -12,6 +12,7 @@ final class AppCoordinator {
   private let gate = AccessibilityGate()
   private var tap: EventTap!
   private var menu: MenuBarController!
+  private var tapRetry: Timer?
 
   init() {
     settings = store.load()
@@ -25,11 +26,39 @@ final class AppCoordinator {
     tap.apply(machine.setConfig(settings.gestureConfig(enabled: settings.enabledOnStart)))
     refreshWheelArt()
     refreshMenu()
-    gate.waitForPermission { [weak self] in
-      guard let self else { return }
-      if !self.tap.start() { NSLog("ping-signals: event tap failed to start") }
-      self.refreshMenu()
+    tap.onPermissionLost = { [weak self] in self?.permissionLost() }
+    armTap(prompt: true)
+  }
+
+  // MARK: Event tap lifecycle
+
+  private func armTap(prompt: Bool) {
+    gate.waitForPermission(prompt: prompt) { [weak self] in self?.startTap() }
+  }
+
+  /// Starts the tap; if that fails although permission is granted, retries once a second.
+  private func startTap() {
+    tapRetry?.invalidate()
+    tapRetry = nil
+    refreshMenu()
+    guard !tap.start() else { return }
+    guard gate.isTrusted else { armTap(prompt: false); return }
+    NSLog("ping-signals: event tap failed to start; retrying")
+    let t = Timer(timeInterval: 1, repeats: false) { [weak self] _ in
+      MainActor.assumeIsolated { self?.startTap() }
     }
+    RunLoop.main.add(t, forMode: .common)
+    tapRetry = t
+  }
+
+  /// The tap has already stopped itself. Drop any gesture in progress and wait for a new grant.
+  private func permissionLost() {
+    NSLog("ping-signals: Accessibility permission revoked; event tap stopped")
+    tap.apply(machine.setSuspended(true))   // cancels a pending/open wheel (emits .cancel)
+    _ = machine.setSuspended(false)
+    overlay.cancelWheel()
+    refreshMenu()
+    armTap(prompt: false)
   }
 
   // MARK: Gesture output
