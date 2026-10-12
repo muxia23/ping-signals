@@ -1,4 +1,4 @@
-public enum PingID: String, Codable, CaseIterable, Sendable {
+public enum PingID: String, Codable, CodingKeyRepresentable, CaseIterable, Sendable {
   case danger, push, omw, allin, assist, needvision, missing, enemyvision, generic, bait, visioncleared
 }
 

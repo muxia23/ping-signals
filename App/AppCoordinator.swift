@@ -29,7 +29,7 @@ final class AppCoordinator {
       .claudeQuickEntry: ClaudeQuickEntryAction(),
       .todoPanel: TodoPanelAction(panel: todoPanel),
       .retreat: RetreatAction(),
-    ]))
+    ]) { [weak self] in self?.settings.actions ?? PingActions.defaults })
     machine.fullscreenProbe = { x, y in MainActor.assumeIsolated { FullscreenProbe.isFullscreen(x: x, y: y) } }
     tap.apply(machine.setConfig(settings.gestureConfig(enabled: settings.enabledOnStart)))
     refreshWheelArt()

@@ -76,6 +76,23 @@ import Testing
     #expect(c.clickPing && c.trigger == .mouse4 && c.gameCheck && !c.enabled && c.dragThresholdPx == 8)
   }
 
+  @Test func actionsDefaultAndRoundTrip() throws {
+    #expect(Settings().actions == PingActions.defaults)
+    var s = Settings()
+    s.actions[.missing] = .shell("echo $PING_ID")
+    s.actions[.danger] = ActionConfig.none
+    #expect(Settings.decodeLeniently(try JSONEncoder().encode(s)) == s)
+  }
+
+  @Test func badActionEntriesFallBackIndividually() {
+    let s = decode(#"{"actions": {"missing": {"type": "shell", "value": "ls"}, "danger": {"type": "laser"}, "omw": 3, "nope": {"type": "none"}}}"#)
+    #expect(s.actions[.missing] == .shell("ls"))
+    #expect(s.actions[.danger] == .retreat)      // unknown type → default
+    #expect(s.actions[.omw] == .todoPanel)       // malformed → default
+    #expect(s.actions[.assist] == .claudeQuickEntry)  // missing → default
+    #expect(s.actions.count == PingID.allCases.count)
+  }
+
   @Test func storePersists() {
     let defaults = UserDefaults(suiteName: "ping-signals-tests-\(UUID().uuidString)")!
     let store = SettingsStore(defaults: defaults)

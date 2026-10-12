@@ -23,6 +23,8 @@ public struct Settings: Codable, Equatable, Sendable {
   public var launchAtLogin = false
   public var language: LanguagePref = .auto
   public var autoUpdateCheck = true
+  /// What each ping does; every PingID has an entry.
+  public var actions: [PingID: ActionConfig] = PingActions.defaults
 
   public static let dragRange = 2...40
   public static let sizeRange = 60...220
@@ -72,6 +74,7 @@ public struct Settings: Codable, Equatable, Sendable {
     if let v = field("launchAtLogin", Bool.self) { s.launchAtLogin = v }
     if let v = field("language", LanguagePref.self) { s.language = v }
     if let v = field("autoUpdateCheck", Bool.self) { s.autoUpdateCheck = v }
+    s.actions = PingActions.decodeLeniently(obj["actions"])
     // A custom trigger key can't be the pause shortcut's key.
     if case .key(let vk) = s.trigger, vk == s.toggleHotkey.vk { s.trigger = .option }
     return s

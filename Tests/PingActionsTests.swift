@@ -3,21 +3,51 @@ import Testing
 @testable import PingCore
 
 @Suite struct PingActionsTests {
-  @Test func mapping() {
-    #expect(PingActions.kind(for: .assist) == .claudeQuickEntry)
-    #expect(PingActions.kind(for: .omw) == .todoPanel)
-    #expect(PingActions.kind(for: .danger) == .retreat)
-    for id in PingID.allCases where ![.assist, .omw, .danger].contains(id) {
-      #expect(PingActions.kind(for: id) == nil, "\(id)")
-    }
+  private func signal(_ id: PingID, _ source: PingSignal.Source = .wheel) -> PingSignal {
+    PingSignal(ping: id, style: .classic, point: GesturePoint(0, 0), frontApp: nil, time: Date(), source: source)
+  }
+
+  @Test func defaultsMatchV2() {
+    let d = PingActions.defaults
+    #expect(d[.assist] == .claudeQuickEntry)
+    #expect(d[.omw] == .todoPanel)
+    #expect(d[.danger] == .retreat)
+    #expect(d.count == PingID.allCases.count)
+    for id in PingID.allCases where ![.assist, .omw, .danger].contains(id) { #expect(d[id] == ActionConfig.none, "\(id)") }
   }
 
   @Test func previewsNeverAct() {
-    func signal(_ source: PingSignal.Source) -> PingSignal {
-      PingSignal(ping: .danger, style: .classic, point: GesturePoint(0, 0), frontApp: nil, time: Date(), source: source)
+    let a = PingActions.defaults
+    #expect(PingActions.shouldAct(on: signal(.danger, .wheel), actions: a) == .retreat)
+    #expect(PingActions.shouldAct(on: signal(.danger, .click), actions: a) == .retreat)
+    #expect(PingActions.shouldAct(on: signal(.danger, .preview), actions: a) == nil)
+  }
+
+  @Test func ineffectiveActionsDoNothing() {
+    var a = PingActions.defaults
+    a[.missing] = .shell("   ")
+    a[.push] = .keystroke(Hotkey(mods: [], vk: 0))
+    a[.bait] = .open("")
+    #expect(PingActions.shouldAct(on: signal(.missing), actions: a) == nil)
+    #expect(PingActions.shouldAct(on: signal(.push), actions: a) == nil)
+    #expect(PingActions.shouldAct(on: signal(.bait), actions: a) == nil)
+    #expect(PingActions.shouldAct(on: signal(.generic), actions: a) == nil)
+    a[.missing] = .shell("say hi")
+    #expect(PingActions.shouldAct(on: signal(.missing), actions: a) == .shell("say hi"))
+  }
+
+  @Test func codableRoundTrip() throws {
+    let all: [ActionConfig] = [.none, .retreat, .todoPanel, .claudeQuickEntry, .shortcut("翻译"),
+                               .keystroke(Hotkey(mods: [.command, .shift], vk: 0x41)), .open("https://x.y"), .shell("ls")]
+    for c in all {
+      let back = try JSONDecoder().decode(ActionConfig.self, from: JSONEncoder().encode(c))
+      #expect(back == c)
     }
-    #expect(PingActions.shouldAct(on: signal(.wheel)) == .retreat)
-    #expect(PingActions.shouldAct(on: signal(.click)) == .retreat)
-    #expect(PingActions.shouldAct(on: signal(.preview)) == nil)
+    let json = String(decoding: try JSONEncoder().encode(ActionConfig.shortcut("A")), as: UTF8.self)
+    #expect(json.contains(#""type":"shortcut""#) && json.contains(#""value":"A""#))
+  }
+
+  @Test func blankPerKind() {
+    for k in ActionConfig.Kind.allCases { #expect(ActionConfig.blank(k).kind == k) }
   }
 }
