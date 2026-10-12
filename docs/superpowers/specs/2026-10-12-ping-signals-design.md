@@ -145,7 +145,7 @@ final class GestureMachine {
 
 ### 4.3 FullscreenProbe
 
-`CGWindowListCopyWindowInfo(.optionOnScreenOnly)` 取点下最上层的普通窗口（layer 0），若其 bounds 等于所在屏幕 frame 即视为全屏。结果按 PID 缓存 500 ms，避免每次点击都查询。
+`CGWindowListCopyWindowInfo(.optionOnScreenOnly)` 取点下最上层的普通窗口（layer 0），若其 bounds 等于所在屏幕 frame 即视为全屏。只在一次手势即将开始时查询（约 1 ms），普通点击不触发，因此不做缓存。
 
 ## 5. 覆盖层（Overlay）
 
@@ -210,13 +210,13 @@ func pickSlice(dx: CGFloat, dy: CGFloat, slots: Int, deadZone: CGFloat) -> Int?
 
 | 方向 | 标记 | 轮盘图标（图集裁切） | 场景图标 / 底座 | 音效 | 颜色 |
 |---|---|---|---|---|---|
-| 上 | 危险 | `!` (467,70,26,52) | `ping-danger.png` / `ping-danger-base.png`（三角） | `GetBack`* | #e8322f |
-| 右 | 正在路上 | 箭头 (389,70,54,52) | `ping-omw_02.png` + `ping-omw-arrow.png` / `ping-omw-base.png` | `OnMyWay` | #1fb38a |
-| 下 | 请求协助 | 旗子 (464,6,46,52) | `ping-comehere_02.png` / `ping-comehere-base.png` | `ComeHere` | #2e9bd6 |
-| 左 | 敌人消失 | `?` (400,6,32,52) | `ping-mia_02.png` / `ping-mia-base.png` + `ping-mia-base-outer.png` | `MIA` | #f0b030 |
-| 单击 | 普通标记 | — | `sr_pings_blue_02.png` / `ping-command-base.png` | `Base` | #2e9bd6 |
+| 上 | 危险 | `!` (467,70,26,52) | `ping-danger.png` / `ping-danger-base.png`（三角） | `GetBack`* | #ff0000 |
+| 右 | 正在路上 | 箭头 (389,70,54,52) | `ping-omw_02.png` / `ping-omw-base.png` | `OnMyWay` | #26aa99 |
+| 下 | 请求协助 | 旗子 (464,6,46,52) | `ping-comehere_02.png` / `ping-comehere-base.png` | `ComeHere` | #189cdb |
+| 左 | 敌人消失 | `?` (400,6,32,52) | `ping-mia_02.png` / `ping-mia-base.png` + `ping-mia-base-outer.png` | `MIA` | #b2a323 |
+| 单击 | 普通标记 | — | `sr_pings_blue_02.png` / `ping-command-base.png` | `Base` | #3179c6 |
 
-\* 老版危险音效推定为 `GetBack`（12.21 音效文件无公开存档，无法逐字节核对），实现后由用户试听确认；不对则改用其他候选。颜色取自对应 `*-color.png` 渐变条的主色，实现时用取色脚本确定精确值。
+\* 老版危险音效推定为 `GetBack`（12.21 音效文件无公开存档，无法逐字节核对），实现后由用户试听确认；不对则改用其他候选。颜色为对应 `*-base-color.png` 渐变条的峰值色（已取色）。`ping-omw-arrow.png` 的摆放方式无从考证，v1 不使用。
 
 **轮盘（`ClassicWheelView`）**：由 `contextwheel_atlas.png`（512×512）的切片拼装。切片坐标（x, y, w, h）：
 
@@ -233,16 +233,16 @@ func pickSlice(dx: CGFloat, dy: CGFloat, slots: Int, deadZone: CGFloat) -> Int?
 | 中心 ✕ 按钮（常态 / 高亮） | (96,448,60,60) / (166,448,60,60) | 死区（取消）提示；死区内时显示高亮 |
 | 环 | (299,268,68,68)、(299,343,40,40) | 备选装饰 |
 
-- 拼装方式与缩放比例**先产出预览图（静态 PNG：常态 + 4 个方向各高亮一次），经用户确认后**再接入覆盖层。
+- 拼装方式与缩放比例**先产出预览图（静态 PNG：常态 + 4 个方向各高亮一次），经用户确认后**再接入覆盖层。参考拼装：`reference/classic-wheel-target.png`（由 `reference/classic_wheel_mockup.py` 生成，轮盘半径 R = 142 atlas px）。
 - 死区半径 = 中心圆半径（按最终缩放换算）；4 个图标分别位于上右下左的扇区中心。
 - 高亮变化时播放提示音 `button`（与新版共用开关）。
 
 **场景标记动画（`ClassicPingAnimator`）**：老版是游戏粒子特效，无法取得参数，按老版观感近似复刻：
 
 - 底座光环：贴图用标记颜色着色（底座贴图为白色灰度），从 scale 0.6 放大到 1.0 并淡入（0.2 s），持续发光，最后 15 % 时长淡出。敌人消失额外叠加 `ping-mia-base-outer` 外圈，缓慢放大淡出。
-- 图标：从上方 0.3·size 处落下到底座上方（0.25 s，回弹曲线），之后 ±4 pt 上下浮动，周期 1.6 s；正在路上的箭头额外做一次向前（右上）位移脉冲。
+- 图标：从上方 0.3·size 处落下到底座上方（0.25 s，回弹曲线），之后 ±4 pt 上下浮动，周期 1.6 s。
 - 大小与时长沿用 `pingSizePx` / `pingDurationS`。
-- 动画效果同样先出预览（录屏或逐帧图）给用户确认。
+- 动画效果由用户在应用里实际试看确认（菜单栏「预览标记」在屏幕中央逐个放出）。
 
 ## 6. 信号接口（Signals）
 
