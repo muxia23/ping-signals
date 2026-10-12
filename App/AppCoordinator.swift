@@ -13,6 +13,7 @@ final class AppCoordinator {
   private let todoStore = TodoStore(fileURL: TodoStore.defaultURL)
   private lazy var todoPanel = TodoPanelController(store: todoStore)
   private var tap: EventTap!
+  private var runner: ActionRunner!
   private var menu: MenuBarController!
   private var tapRetry: Timer?
   private var screenObserver: NSObjectProtocol?
@@ -25,11 +26,9 @@ final class AppCoordinator {
       setStyle: { [weak self] s in self?.setStyle(s) },
       preview: { [weak self] id in self?.preview(id) }))
     bus.register(PingEffectHandler(overlay: overlay, sound: sound) { [weak self] in self?.settings ?? Settings() })
-    bus.register(ActionRouter(actions: [
-      .claudeQuickEntry: ClaudeQuickEntryAction(),
-      .todoPanel: TodoPanelAction(panel: todoPanel),
-      .retreat: RetreatAction(),
-    ]) { [weak self] in self?.settings.actions ?? PingActions.defaults })
+    runner = ActionRunner(retreat: RetreatAction(), todoPanel: TodoPanelAction(panel: todoPanel),
+                          claude: ClaudeQuickEntryAction())
+    bus.register(ActionRouter(runner: runner) { [weak self] in self?.settings.actions ?? PingActions.defaults })
     machine.fullscreenProbe = { x, y in MainActor.assumeIsolated { FullscreenProbe.isFullscreen(x: x, y: y) } }
     tap.apply(machine.setConfig(settings.gestureConfig(enabled: settings.enabledOnStart)))
     refreshWheelArt()

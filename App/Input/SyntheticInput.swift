@@ -40,4 +40,20 @@ enum SyntheticInput {
     e.setIntegerValueField(.eventSourceUserData, value: marker)
     e.post(tap: .cghidEventTap)
   }
+
+  /// Presses and releases `hotkey` (call after `whenModifiersReleased`).
+  static func press(_ hotkey: Hotkey) {
+    guard let code = KeyMap.vkToKeyCode(hotkey.vk) else { return }
+    var flags: UInt64 = 0
+    if hotkey.mods.contains(.control) { flags |= KeyMap.Flag.control }
+    if hotkey.mods.contains(.option) { flags |= KeyMap.Flag.option }
+    if hotkey.mods.contains(.shift) { flags |= KeyMap.Flag.shift }
+    if hotkey.mods.contains(.command) { flags |= KeyMap.Flag.command }
+    for down in [true, false] {
+      guard let e = CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: down) else { return }
+      e.flags = CGEventFlags(rawValue: flags)
+      e.setIntegerValueField(.eventSourceUserData, value: marker)
+      e.post(tap: .cghidEventTap)
+    }
+  }
 }

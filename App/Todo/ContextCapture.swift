@@ -58,4 +58,36 @@ enum ContextCapture {
       .trimmingCharacters(in: .whitespacesAndNewlines)
     return s.isEmpty || s == "missing value" ? nil : s
   }
+
+  /// Like `capture`, but waits (at most `timeout`) for the browser URL so one-shot actions get it too.
+  static func captureWaitingForURL(timeout: Duration = .seconds(1)) async -> TodoContext {
+    let once = Once()
+    return await withCheckedContinuation { (cont: CheckedContinuation<TodoContext, Never>) in
+      var ctx = TodoContext()
+      ctx = capture { url in
+        guard !once.fired else { return }
+        once.fired = true
+        var withURL = once.base
+        withURL.url = url
+        cont.resume(returning: withURL)
+      }
+      once.base = ctx
+      guard let id = ctx.bundleID, urlScript(for: id) != nil else {
+        once.fired = true
+        cont.resume(returning: ctx)
+        return
+      }
+      Task { @MainActor in
+        try? await Task.sleep(for: timeout)
+        guard !once.fired else { return }
+        once.fired = true
+        cont.resume(returning: once.base)
+      }
+    }
+  }
+
+  @MainActor private final class Once {
+    var fired = false
+    var base = TodoContext()
+  }
 }

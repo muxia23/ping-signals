@@ -8,16 +8,16 @@ protocol PingAction: AnyObject {
 /// Signal handler that runs the action bound to each ping.
 @MainActor
 final class ActionRouter: SignalHandler {
-  private let actions: [ActionConfig.Kind: PingAction]
+  private let runner: ActionRunner
   private let bindings: () -> [PingID: ActionConfig]
 
-  init(actions: [ActionConfig.Kind: PingAction], bindings: @escaping () -> [PingID: ActionConfig]) {
-    self.actions = actions
+  init(runner: ActionRunner, bindings: @escaping () -> [PingID: ActionConfig]) {
+    self.runner = runner
     self.bindings = bindings
   }
 
   func handle(_ signal: PingSignal) {
     guard let c = PingActions.shouldAct(on: signal, actions: bindings()) else { return }
-    actions[c.kind]?.perform(signal)
+    runner.run(c, signal: signal)
   }
 }
