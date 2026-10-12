@@ -11,7 +11,7 @@
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?style=flat-square&logo=apple&logoColor=white)](#-安装)
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-native-1f6feb?style=flat-square)](#-轻到感觉不到)
-[![2.5 MB](https://img.shields.io/badge/app-2.5%20MB-2ea44f?style=flat-square)](#-轻到感觉不到)
+[![Download](https://img.shields.io/github/v/release/muxia23/ping-signals?style=flat-square&label=download&color=2ea44f)](https://github.com/muxia23/ping-signals/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 
 **简体中文** · [English](README_EN.md)
@@ -41,7 +41,7 @@
 <td width="33%" valign="top">
 
 #### 🪶 轻到感觉不到
-纯 Swift 原生实现。约 40 MB 内存，空闲 CPU 0.03%，整个应用 2.5 MB。
+纯 Swift 原生实现。约 40 MB 内存，空闲 CPU 0.03%，安装包不到 3 MB。
 
 </td>
 </tr>
@@ -135,7 +135,7 @@ say "$PING_ID"
 |---|---:|---:|
 | 内存占用 | ~490 MB | **~40 MB** |
 | 空闲 CPU | 7–12% | **0.03%** |
-| 应用体积 | 343 MB | **2.5 MB** |
+| 安装包 | 175 MB | **2.7 MB** |
 
 <sub>M1 Pro，`scripts/measure.sh` 测量。</sub>
 
@@ -157,7 +157,20 @@ ping-signals 不联网，也不记录你的输入。「辅助功能」权限只�
 
 ## 📦 安装
 
-> 还没有发布正式版本，目前需要从源码构建（需要 macOS 14+、Xcode 16+）。
+1. 从 [Releases](https://github.com/muxia23/ping-signals/releases/latest) 下载 `ping-signals-x.y.z.dmg`（Apple 芯片与 Intel 通用，需要 macOS 14+）。
+2. 打开 dmg，把 **ping-signals** 拖进「应用程序」。
+3. 第一次打开：ping-signals 没有经过 Apple 公证，macOS 会拦一下。到 **系统设置 → 隐私与安全性**，在底部点 **「仍要打开」**。或者在终端运行：
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/ping-signals.app
+   ```
+4. 按引导窗口打开「辅助功能」权限，窗口会自己关掉。菜单栏出现图标即可开始：按住 <kbd>⌥</kbd> 拖一下。
+
+<details>
+<summary><b>从源码构建</b></summary>
+
+<br>
+
+需要 Xcode 16+。
 
 ```bash
 git clone https://github.com/muxia23/ping-signals.git
@@ -172,7 +185,7 @@ xcodebuild build -project PingSignals.xcodeproj -scheme PingSignals \
 open build/Build/Products/Release/ping-signals.app
 ```
 
-首次启动会出现引导窗口，按提示打开「辅助功能」权限即可，窗口会自己关掉。
+</details>
 
 <details>
 <summary><b>开发者</b></summary>
@@ -205,7 +218,8 @@ ping-signals.app/Contents/MacOS/ping-signals --render-settings <dir>
 - [x] 信号动作：撤退、待办面板、呼叫 Claude
 - [x] 自定义动作：快捷指令、快捷键、应用 / 网址、Shell
 - [x] 设置窗口、首次引导、开机自启、中英双语
-- [ ] 自动更新（Sparkle）与正式发布
+- [x] 首个正式版本 v0.1.0
+- [ ] 自动更新（Sparkle）
 - [ ] 待办面板的更多玩法
 
 ## 🙏 致谢

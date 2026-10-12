@@ -11,7 +11,7 @@ Hold <kbd>⌥</kbd> and drag to summon the wheel. Let go to send a signal. Every
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?style=flat-square&logo=apple&logoColor=white)](#-install)
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-native-1f6feb?style=flat-square)](#-featherweight)
-[![2.5 MB](https://img.shields.io/badge/app-2.5%20MB-2ea44f?style=flat-square)](#-featherweight)
+[![Download](https://img.shields.io/github/v/release/muxia23/ping-signals?style=flat-square&label=download&color=2ea44f)](https://github.com/muxia23/ping-signals/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 
 **English** · [简体中文](README.md)
@@ -41,7 +41,7 @@ Run a shortcut, press keys, open an app or URL, or run a shell command. 11 pings
 <td width="33%" valign="top">
 
 #### 🪶 Featherweight
-Native Swift. About 40 MB of memory, 0.03% CPU at idle, and a 2.5 MB app.
+Native Swift. About 40 MB of memory, 0.03% CPU at idle, and a download under 3 MB.
 
 </td>
 </tr>
@@ -135,7 +135,7 @@ Same job, a menu bar ping tool:
 |---|---:|---:|
 | Memory | ~490 MB | **~40 MB** |
 | Idle CPU | 7–12% | **0.03%** |
-| App size | 343 MB | **2.5 MB** |
+| Download | 175 MB | **2.7 MB** |
 
 <sub>M1 Pro, measured with `scripts/measure.sh`.</sub>
 
@@ -157,7 +157,20 @@ ping-signals never goes online and doesn't record what you type. Accessibility i
 
 ## 📦 Install
 
-> There's no release yet; build from source for now (macOS 14+, Xcode 16+).
+1. Download `ping-signals-x.y.z.dmg` from [Releases](https://github.com/muxia23/ping-signals/releases/latest) (universal: Apple silicon and Intel, macOS 14+).
+2. Open the dmg and drag **ping-signals** into Applications.
+3. First launch: ping-signals isn't notarized by Apple, so macOS blocks it once. Go to **System Settings → Privacy & Security** and click **Open Anyway** at the bottom. Or run:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/ping-signals.app
+   ```
+4. Follow the guide to grant Accessibility; it closes itself. When the menu bar icon appears, hold <kbd>⌥</kbd> and drag.
+
+<details>
+<summary><b>Build from source</b></summary>
+
+<br>
+
+Requires Xcode 16+.
 
 ```bash
 git clone https://github.com/muxia23/ping-signals.git
@@ -172,7 +185,7 @@ xcodebuild build -project PingSignals.xcodeproj -scheme PingSignals \
 open build/Build/Products/Release/ping-signals.app
 ```
 
-On first launch a guide walks you through granting Accessibility, then closes itself.
+</details>
 
 <details>
 <summary><b>For developers</b></summary>
@@ -205,7 +218,8 @@ ping-signals.app/Contents/MacOS/ping-signals --render-settings <dir>
 - [x] Signal actions: Retreat, todo panel, call Claude
 - [x] Custom actions: shortcuts, keys, apps / URLs, shell
 - [x] Settings window, first-launch guide, launch at login, English and Chinese
-- [ ] Auto-update (Sparkle) and a first release
+- [x] First release, v0.1.0
+- [ ] Auto-update (Sparkle)
 - [ ] More to do with the todo panel
 
 ## 🙏 Thanks
