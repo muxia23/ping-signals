@@ -57,13 +57,13 @@ enum ModernWheelRenderer {
       ctx.setAlpha(1)
     }
 
-    let highlights: [CGImage] = (0..<8).map { i in
-      layer { ctx in
+    let highlights: [WheelImage] = (0..<8).map { i in
+      WheelImage(cropping: layer { ctx in
         let reach = i % 2 == 0 ? extR : outerR
         ctx.setAlpha(0.55)
         radial(ctx, clip: sector(innerR, reach, mids[i] - 22.5, mids[i] + 22.5), radius: extR,
                stops: [(innerR / extR, 0x8A8F96, 1), (outerR / extR, 0x9AA0A8, 1), (1, 0x9AA0A8, 0)])
-      }
+      }, scale: pixelScale)
     }
 
     let over = layer { ctx in

@@ -42,8 +42,8 @@ enum ClassicWheelRenderer {
     }
 
     // North and west wedges; south and east are the same sprites turned 180° about the wheel centre.
-    let highlights: [CGImage] = (0..<4).map { i in
-      layer { ctx in
+    let highlights: [WheelImage] = (0..<4).map { i in
+      let full = layer { ctx in
         ctx.translateBy(x: C, y: C)
         ctx.rotate(by: i >= 2 ? .pi : 0)
         ctx.translateBy(x: -C, y: -C)
@@ -55,6 +55,7 @@ enum ClassicWheelRenderer {
           Drawing.draw(sprite(wedgeSide), centeredAt: CGPoint(x: C - R + sz.width / 2 + 4, y: C), size: sz, ctx)
         }
       }
+      return WheelImage(cropping: full, scale: pixelScale)
     }
     // Slice order is N, E, S, W: highlights above were built as N, W, S, E — reorder.
     let ordered = [highlights[0], highlights[3], highlights[2], highlights[1]]
@@ -78,9 +79,9 @@ enum ClassicWheelRenderer {
       }
     }
 
-    let hot = layer { ctx in
+    let hot = WheelImage(cropping: layer { ctx in
       Drawing.draw(sprite(cancelHot), centeredAt: CGPoint(x: C, y: C), size: natural(cancelHot), ctx)
-    }
+    }, scale: pixelScale)
 
     return WheelArt(size: size, scale: pixelScale, under: under, highlights: ordered, over: over,
                     centerHot: hot, deadZone: CGFloat(center.w) / 2 * s)

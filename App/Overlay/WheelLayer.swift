@@ -24,22 +24,27 @@ final class WheelLayer {
     CATransaction.begin()
     CATransaction.setDisableActions(true)
     highlightLayers.forEach { $0.removeFromSuperlayer() }
+    // Canvas frames are y down; layer geometry here is y up.
+    func place(_ l: CALayer, _ f: CGRect) {
+      l.frame = CGRect(x: f.minX, y: art.size.height - f.maxY, width: f.width, height: f.height)
+      l.contentsScale = art.scale
+    }
     highlightLayers = art.highlights.map { img in
       let l = CALayer()
-      l.contents = img
+      l.contents = img.image
       l.isHidden = true
+      place(l, img.frame)
       return l
     }
     for l in highlightLayers { root.insertSublayer(l, above: underLayer) }
     underLayer.contents = art.under
     overLayer.contents = art.over
-    hotCenter.contents = art.centerHot
+    hotCenter.contents = art.centerHot?.image
     root.bounds = CGRect(origin: .zero, size: art.size)
-    for l in [underLayer, overLayer, hotCenter] + highlightLayers {
-      l.bounds = CGRect(origin: .zero, size: art.size)
-      l.position = CGPoint(x: art.size.width / 2, y: art.size.height / 2)
-      l.contentsScale = art.scale
-    }
+    let canvas = CGRect(origin: .zero, size: art.size)
+    place(underLayer, canvas)
+    place(overLayer, canvas)
+    place(hotCenter, art.centerHot?.frame ?? canvas)
     CATransaction.commit()
   }
 
