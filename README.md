@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/classic-wheel.png" width="200" alt="ping-signals classic wheel">
+<img src="docs/images/icon.png" width="160" alt="ping-signals icon">
 
 # ping-signals
 

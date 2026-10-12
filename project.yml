@@ -44,6 +44,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.muxia.ping-signals
         PRODUCT_NAME: ping-signals
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
   PingCoreTests:
     type: bundle.unit-test
     platform: macOS

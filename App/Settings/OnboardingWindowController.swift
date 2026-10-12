@@ -24,7 +24,7 @@ final class OnboardingWindowController {
 struct OnboardingView: View {
   var body: some View {
     VStack(spacing: 16) {
-      Image(systemName: "exclamationmark.bubble.fill").font(.system(size: 56)).foregroundStyle(.tint)
+      Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 80, height: 80)
       Text("Allow ping-signals to see ⌥ + drag").font(.title2.bold())
       Text("ping-signals needs Accessibility access to notice the trigger key and the mouse. It doesn't read what you type and sends nothing anywhere.")
         .multilineTextAlignment(.center).foregroundStyle(.secondary)
