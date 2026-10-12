@@ -4,9 +4,6 @@ import PingCore
 /// Session-level CGEventTap feeding GestureMachine. Needs Accessibility permission.
 @MainActor
 final class EventTap {
-  /// "LPIN" in eventSourceUserData marks events we post ourselves.
-  private static let selfMarker: Int64 = 0x4C50_494E
-
   private let machine: GestureMachine
   private let onEmit: (GestureEmit) -> Void
   private var tap: CFMachPort?
@@ -101,7 +98,7 @@ final class EventTap {
       resync()
       return false
     }
-    if event.getIntegerValueField(.eventSourceUserData) == Self.selfMarker { return false }
+    if event.getIntegerValueField(.eventSourceUserData) == SyntheticInput.marker { return false }
     let t = Self.nowMs()
     feedFlags(event.flags.rawValue, t)
     if type == .flagsChanged { return false }
@@ -183,7 +180,7 @@ final class EventTap {
     e.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button.rawValue))
     e.setIntegerValueField(.mouseEventClickState, value: 1)
     e.flags = CGEventFlags(rawValue: flags)       // a replayed ⌥-click keeps its ⌥
-    e.setIntegerValueField(.eventSourceUserData, value: Self.selfMarker)
+    e.setIntegerValueField(.eventSourceUserData, value: SyntheticInput.marker)
     e.post(tap: .cghidEventTap)
   }
 
