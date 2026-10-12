@@ -43,4 +43,13 @@ import Testing
     #expect(s.count == 13)
     #expect(s.contains("GetBack") && s.contains("button") && s.contains("SRP_12"))
   }
+
+  @Test func resourcesMatchCatalog() throws {
+    let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+    let fm = FileManager.default
+    let textures = try fm.contentsOfDirectory(atPath: root.appendingPathComponent("App/Resources/Textures").path)
+    let sounds = try fm.contentsOfDirectory(atPath: root.appendingPathComponent("App/Resources/Sounds").path)
+    #expect(Set(textures) == Set(PingCatalog.allTextures.map { "\($0).png" }))
+    #expect(Set(sounds) == Set(PingCatalog.allSounds.map { "\($0).m4a" }))
+  }
 }
