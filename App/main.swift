@@ -9,6 +9,8 @@ if let i = args.firstIndex(of: "--render-wheels"), i + 1 < args.count {
   MainActor.assumeIsolated {
     let classic = ClassicWheelRenderer.render(wheel: PingCatalog.classicWheel, pixelScale: 2)
     try? classic.writePreview(to: dir.appendingPathComponent("classic.png"))
+    let modern = ModernWheelRenderer.render(wheel: PingCatalog.defaultModernWheel, pixelScale: 2)
+    try? modern.writePreview(to: dir.appendingPathComponent("modern.png"))
   }
   exit(0)
 }
