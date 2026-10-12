@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class OnboardingWindowController {
   private var window: NSWindow?
+  private var closeObserver: NSObjectProtocol?
 
   func show() {
     if window == nil {
@@ -13,6 +14,18 @@ final class OnboardingWindowController {
       w.isReleasedWhenClosed = false
       w.center()
       window = w
+      // Release it once closed; it's only needed until permission is granted.
+      closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: w,
+                                                             queue: .main) { [weak self] _ in
+        MainActor.assumeIsolated {
+          guard let self else { return }
+          if let o = self.closeObserver { NotificationCenter.default.removeObserver(o) }
+          self.closeObserver = nil
+          let closing = self.window
+          self.window = nil
+          DispatchQueue.main.async { _ = closing }
+        }
+      }
     }
     NSApp.activate()
     window?.makeKeyAndOrderFront(nil)

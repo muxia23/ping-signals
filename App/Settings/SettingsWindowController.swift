@@ -7,6 +7,7 @@ final class SettingsWindowController {
   let model: SettingsModel
   private(set) var window: NSWindow?
   private var tabs: NSTabViewController?
+  private var closeObserver: NSObjectProtocol?
 
   init(model: SettingsModel) { self.model = model }
 
@@ -45,6 +46,21 @@ final class SettingsWindowController {
       w.center()
       window = w
       self.tabs = tabs
+      // Drop the window and its SwiftUI views once closed (tens of MB); the next show() rebuilds them.
+      closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: w,
+                                                             queue: .main) { [weak self] _ in
+        MainActor.assumeIsolated { self?.releaseWindow() }
+      }
     }
+  }
+
+  private func releaseWindow() {
+    if let closeObserver { NotificationCenter.default.removeObserver(closeObserver) }
+    closeObserver = nil
+    // After the close completes: the window is still mid-close inside this notification.
+    let w = window
+    window = nil
+    tabs = nil
+    DispatchQueue.main.async { _ = w }
   }
 }

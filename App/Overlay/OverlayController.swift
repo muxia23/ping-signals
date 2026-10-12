@@ -3,7 +3,8 @@ import QuartzCore
 import PingCore
 
 /// One transparent, click-through panel per screen, above fullscreen apps, on every Space.
-/// A panel is on screen only while it shows a wheel or a ping; otherwise it stays allocated but ordered out.
+/// A panel is on screen only while it shows a wheel or a ping. Panels are created deferred, so a screen-sized
+/// backing store (tens of MB) is only allocated once a panel is first shown.
 @MainActor
 final class OverlayController {
   static let maxPings = 60
@@ -19,7 +20,7 @@ final class OverlayController {
     init(screen: NSScreen) {
       screenFrame = screen.frame
       backingScale = screen.backingScaleFactor
-      window = NSPanel(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+      window = NSPanel(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
       window.isOpaque = false
       window.backgroundColor = .clear
       window.hasShadow = false

@@ -38,12 +38,18 @@ struct WheelTab: View {
   }
 }
 
-/// Wheel pictures for the style cards, rendered once.
+/// Wheel pictures for the style cards, rendered once and scaled down to the 200 pt (@2x) they're shown at.
 @MainActor
 private enum WheelThumbnails {
-  static let classic = ClassicWheelRenderer.render(wheel: PingCatalog.classicWheel, pixelScale: 2).idleImage()
-  static let modern = ModernWheelRenderer.render(wheel: PingCatalog.defaultModernWheel, pixelScale: 2)
-    .idleImage(fraction: 0.74)
+  static let classic = downscaled(ClassicWheelRenderer.render(wheel: PingCatalog.classicWheel, pixelScale: 2).idleImage())
+  static let modern = downscaled(ModernWheelRenderer.render(wheel: PingCatalog.defaultModernWheel, pixelScale: 2)
+    .idleImage(fraction: 0.74))
 
   static func image(_ style: WheelStyle) -> CGImage { style == .classic ? classic : modern }
+
+  private static func downscaled(_ img: CGImage, side: Int = 400) -> CGImage {
+    guard img.width > side else { return img }
+    let size = CGSize(width: side, height: side)
+    return Drawing.image(size: size, scale: 1) { ctx in Drawing.draw(img, in: CGRect(origin: .zero, size: size), ctx) }
+  }
 }

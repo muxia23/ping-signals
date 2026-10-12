@@ -41,7 +41,7 @@ Run a shortcut, press keys, open an app or URL, or run a shell command. 11 pings
 <td width="33%" valign="top">
 
 #### 🪶 Featherweight
-Native Swift. About 40 MB of memory, 0.03% CPU at idle, and a download under 3 MB.
+Native Swift. About 25 MB of memory and under 0.2% CPU at idle, and a download under 3 MB.
 
 </td>
 </tr>
@@ -133,13 +133,13 @@ Same job, a menu bar ping tool:
 
 | | lolPing (Electron) | **ping-signals** |
 |---|---:|---:|
-| Memory | ~490 MB | **~40 MB** |
-| Idle CPU | 7–12% | **0.03%** |
+| Memory (idle) | ~490 MB | **~25 MB** |
+| Idle CPU | 7–12% | **< 0.2%** |
 | Download | 175 MB | **2.7 MB** |
 
 <sub>M1 Pro, measured with `scripts/measure.sh`.</sub>
 
-Nothing clever: no plain mouse-move monitoring (events are handled only while the trigger key is held), overlay windows exist only while in use, and textures keep only the pixels that get drawn.
+Nothing clever: no plain mouse-move monitoring (events are handled only while the trigger key is held), overlay windows get their buffers only once used, the settings window is freed when closed, and textures keep only the pixels that get drawn. After pinging and opening Settings it settles at about 80–100 MB (cached wheel art, so the wheel pops up instantly) and doesn't grow from there.
 
 ## ✨ Details
 
@@ -219,7 +219,6 @@ ping-signals.app/Contents/MacOS/ping-signals --render-settings <dir>
 - [x] Custom actions: shortcuts, keys, apps / URLs, shell
 - [x] Settings window, first-launch guide, launch at login, English and Chinese
 - [x] First release, v0.1.0
-- [ ] Auto-update (Sparkle)
 - [ ] More to do with the todo panel
 
 ## 🙏 Thanks
