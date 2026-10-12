@@ -49,7 +49,7 @@ enum ClassicPingAnimator {
       root.addSublayer(base)
     }
 
-    guard let name = def.art.first, let img = Textures.named(name) else {
+    guard let name = def.art.first, let img = Textures.trimmedVertically(name) else {
       parent.addSublayer(root)
       return root
     }

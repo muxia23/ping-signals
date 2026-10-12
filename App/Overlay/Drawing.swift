@@ -61,6 +61,26 @@ enum Textures {
     named("contextwheel_atlas")?.cropping(to: CGRect(x: r.x, y: r.y, width: r.w, height: r.h))
   }
 
+  /// The texture with fully transparent rows cut from its top and bottom (the classic icons carry
+  /// half an image of empty space below them). Width is kept so off-centre art stays where it was.
+  static func trimmedVertically(_ name: String) -> CGImage? {
+    let key = "\(name)#trim"
+    if let c = cache[key] { return c }
+    guard let src = named(name) else { return nil }
+    let w = src.width, h = src.height
+    guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w,
+                              space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.alphaOnly.rawValue),
+          let data = ctx.data else { return nil }
+    ctx.draw(src, in: CGRect(x: 0, y: 0, width: w, height: h))
+    let alpha = data.bindMemory(to: UInt8.self, capacity: w * h)
+    // Bitmap rows run top to bottom in memory.
+    let opaqueRows = (0..<h).filter { row in (0..<w).contains { alpha[row * w + $0] > 10 } }
+    guard let top = opaqueRows.first, let bottom = opaqueRows.last,
+          let out = src.cropping(to: CGRect(x: 0, y: top, width: w, height: bottom - top + 1)) else { return src }
+    cache[key] = out
+    return out
+  }
+
   /// A glow texture (white on black, drawn additively by the game) recoloured with `rgb`.
   /// Brightness becomes opacity, so the black background disappears.
   static func tinted(_ name: String, _ rgb: UInt32) -> CGImage? {
