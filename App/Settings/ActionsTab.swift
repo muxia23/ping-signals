@@ -51,7 +51,7 @@ private struct ActionRow: View {
       Picker("", selection: kind) {
         ForEach(ActionConfig.Kind.allCases) { Text(Names.action($0)).tag($0) }
       }
-      .labelsHidden().frame(width: 160)
+      .labelsHidden().fixedSize().frame(width: 160, alignment: .leading)
       parameter.frame(maxWidth: .infinity, alignment: .leading)
       Button("Try") { model.tryAction(config.wrappedValue, id) }
         .disabled(!config.wrappedValue.isEffective)
@@ -76,14 +76,14 @@ private struct ActionRow: View {
     case .open(let s):
       HStack(spacing: 4) {
         TextField("https://… or app", text: Binding { s } set: { config.wrappedValue = .open($0) })
-          .labelsHidden()
+          .labelsHidden().textFieldStyle(.roundedBorder)
         Button("App…") { chooseApp() }
       }
     case .shell(let cmd):
       TextField("command", text: Binding { cmd } set: { config.wrappedValue = .shell($0) })
-        .labelsHidden().font(.system(.body, design: .monospaced))
+        .labelsHidden().textFieldStyle(.roundedBorder).font(.system(.body, design: .monospaced))
     default:
-      EmptyView()
+      Color.clear.frame(height: 1)
     }
   }
 

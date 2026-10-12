@@ -21,10 +21,10 @@ final class OnboardingWindowController {
   func close() { window?.close() }
 }
 
-private struct OnboardingView: View {
+struct OnboardingView: View {
   var body: some View {
     VStack(spacing: 16) {
-      Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 72, height: 72)
+      Image(systemName: "exclamationmark.bubble.fill").font(.system(size: 56)).foregroundStyle(.tint)
       Text("Allow ping-signals to see ⌥ + drag").font(.title2.bold())
       Text("ping-signals needs Accessibility access to notice the trigger key and the mouse. It doesn't read what you type and sends nothing anywhere.")
         .multilineTextAlignment(.center).foregroundStyle(.secondary)

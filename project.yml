@@ -37,6 +37,8 @@ targets:
         LSUIElement: true
         NSAppleEventsUsageDescription: "ping-signals reads the current browser tab's address so a todo can take you back there."
         LSMinimumSystemVersion: "14.0"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSHumanReadableCopyright: "MIT. Ported from darrenprx/lolPing. League of Legends assets © Riot Games."
     settings:
       base:

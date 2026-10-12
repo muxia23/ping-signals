@@ -15,6 +15,15 @@ if let i = args.firstIndex(of: "--render-wheels"), i + 1 < args.count {
   exit(0)
 }
 
+// `ping-signals --render-settings <dir>` writes each settings tab and the onboarding window as PNGs.
+if let i = args.firstIndex(of: "--render-settings"), i + 1 < args.count {
+  let dir = URL(fileURLWithPath: args[i + 1], isDirectory: true)
+  try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+  _ = NSApplication.shared
+  MainActor.assumeIsolated { SettingsPreview.render(to: dir) }
+  exit(0)
+}
+
 // Language preference applies from launch (AppKit reads AppleLanguages once).
 switch SettingsStore().load().language {
 case .auto: UserDefaults.standard.removeObject(forKey: "AppleLanguages")
