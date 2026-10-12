@@ -10,6 +10,8 @@ final class AppCoordinator {
   private let sound = SoundPlayer(names: PingCatalog.allSounds)
   private let bus = SignalBus()
   private let gate = AccessibilityGate()
+  private let todoStore = TodoStore(fileURL: TodoStore.defaultURL)
+  private lazy var todoPanel = TodoPanelController(store: todoStore)
   private var tap: EventTap!
   private var menu: MenuBarController!
   private var tapRetry: Timer?
@@ -23,6 +25,11 @@ final class AppCoordinator {
       setStyle: { [weak self] s in self?.setStyle(s) },
       preview: { [weak self] id in self?.preview(id) }))
     bus.register(PingEffectHandler(overlay: overlay, sound: sound) { [weak self] in self?.settings ?? Settings() })
+    bus.register(ActionRouter(actions: [
+      .claudeQuickEntry: ClaudeQuickEntryAction(),
+      .todoPanel: TodoPanelAction(panel: todoPanel),
+      .retreat: RetreatAction(),
+    ]))
     machine.fullscreenProbe = { x, y in MainActor.assumeIsolated { FullscreenProbe.isFullscreen(x: x, y: y) } }
     tap.apply(machine.setConfig(settings.gestureConfig(enabled: settings.enabledOnStart)))
     refreshWheelArt()

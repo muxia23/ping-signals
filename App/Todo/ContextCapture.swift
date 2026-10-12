@@ -21,6 +21,8 @@ enum ContextCapture {
   /// Title of the focused window via the Accessibility API (permission already granted for the event tap).
   private static func windowTitle(pid: pid_t) -> String? {
     let app = AXUIElementCreateApplication(pid)
+    // A hung app must not stall the ping: give up on its window title after 0.3 s.
+    AXUIElementSetMessagingTimeout(app, 0.3)
     var window: CFTypeRef?
     guard AXUIElementCopyAttributeValue(app, "AXFocusedWindow" as CFString, &window) == .success,
           let window, CFGetTypeID(window) == AXUIElementGetTypeID() else { return nil }
