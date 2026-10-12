@@ -24,7 +24,8 @@ final class AppCoordinator {
     menu = MenuBarController(actions: .init(
       toggleEnabled: { [weak self] in self?.toggleEnabled() },
       setStyle: { [weak self] s in self?.setStyle(s) },
-      preview: { [weak self] id in self?.preview(id) }))
+      preview: { [weak self] id in self?.preview(id) },
+      openSettings: { [weak self] in self?.openSettings() }))
     bus.register(PingEffectHandler(overlay: overlay, sound: sound) { [weak self] in self?.settings ?? Settings() })
     runner = ActionRunner(retreat: RetreatAction(), todoPanel: TodoPanelAction(panel: todoPanel),
                           claude: ClaudeQuickEntryAction())
@@ -112,13 +113,31 @@ final class AppCoordinator {
     refreshMenu()
   }
 
-  private func setStyle(_ s: WheelStyle) {
-    settings.style = s
-    store.save(settings)
+  /// The one place a settings change takes effect.
+  func apply(_ new: Settings) {
+    let old = settings
+    guard new != old else { return }
+    settings = new
+    store.save(new)
+    // Re-sending the config also cancels any gesture in progress (needed when the wheel changes).
+    tap.apply(machine.setConfig(new.gestureConfig(enabled: machine.enabled)))
     overlay.cancelWheel()
-    refreshWheelArt()
+    if new.style != old.style || new.wheel != old.wheel { refreshWheelArt() }
+    if new.launchAtLogin != old.launchAtLogin { LaunchAtLogin.set(new.launchAtLogin) }
+    onSettingsChanged?(new)
     refreshMenu()
   }
+
+  /// Lets the settings window follow changes made elsewhere (e.g. the menu's style switch).
+  var onSettingsChanged: ((Settings) -> Void)?
+
+  private func setStyle(_ s: WheelStyle) {
+    var new = settings
+    new.style = s
+    apply(new)
+  }
+
+  private func openSettings() {}
 
   private func preview(_ id: PingID) {
     emitSignal(id, at: overlay.mouseScreenCenter(), source: .preview)
@@ -133,6 +152,6 @@ final class AppCoordinator {
   }
 
   private func refreshMenu() {
-    menu.update(enabled: machine.enabled, style: settings.style, needsPermission: !gate.isTrusted)
+    menu.update(enabled: machine.enabled, style: settings.style, needsPermission: !gate.isTrusted, toggleHotkey: settings.toggleHotkey)
   }
 }

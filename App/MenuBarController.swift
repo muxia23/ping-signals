@@ -7,6 +7,7 @@ final class MenuBarController: NSObject {
     var toggleEnabled: () -> Void
     var setStyle: (WheelStyle) -> Void
     var preview: (PingID) -> Void
+    var openSettings: () -> Void
   }
 
   private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -19,7 +20,7 @@ final class MenuBarController: NSObject {
   }
 
   /// Rebuilds the menu for the current state.
-  func update(enabled: Bool, style: WheelStyle, needsPermission: Bool) {
+  func update(enabled: Bool, style: WheelStyle, needsPermission: Bool, toggleHotkey: Hotkey) {
     item.button?.appearsDisabled = !enabled || needsPermission
     let menu = NSMenu()
     if needsPermission {
@@ -27,8 +28,15 @@ final class MenuBarController: NSObject {
       menu.addItem(.separator())
     }
     let toggle = entry(enabled ? "暂停 / Pause" : "启用 / Enable") { [actions] in actions.toggleEnabled() }
-    toggle.keyEquivalent = "p"
-    toggle.keyEquivalentModifierMask = [.control, .option]
+    if let key = KeyNames.menuKeyEquivalent(toggleHotkey.vk) {
+      toggle.keyEquivalent = key
+      var mask: NSEvent.ModifierFlags = []
+      if toggleHotkey.mods.contains(.control) { mask.insert(.control) }
+      if toggleHotkey.mods.contains(.option) { mask.insert(.option) }
+      if toggleHotkey.mods.contains(.shift) { mask.insert(.shift) }
+      if toggleHotkey.mods.contains(.command) { mask.insert(.command) }
+      toggle.keyEquivalentModifierMask = mask
+    }
     menu.addItem(toggle)
 
     let styleMenu = NSMenu()
@@ -48,6 +56,10 @@ final class MenuBarController: NSObject {
     previewItem.submenu = previewMenu
     menu.addItem(previewItem)
 
+    menu.addItem(.separator())
+    let settingsItem = entry("设置… / Settings…") { [actions] in actions.openSettings() }
+    settingsItem.keyEquivalent = ","
+    menu.addItem(settingsItem)
     menu.addItem(.separator())
     menu.addItem(entry("退出 / Quit") { NSApp.terminate(nil) })
     item.menu = menu
