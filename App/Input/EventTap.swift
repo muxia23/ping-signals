@@ -24,8 +24,10 @@ final class EventTap {
   /// False when the tap can't be created (no Accessibility permission).
   func start() -> Bool {
     if tap != nil { return true }
+    // No .mouseMoved: every gesture holds a button, so only *MouseDragged events matter, and skipping
+    // plain moves keeps the app from waking on every pointer motion.
     let types: [CGEventType] = [.leftMouseDown, .leftMouseUp, .rightMouseDown, .rightMouseUp, .otherMouseDown, .otherMouseUp,
-                                .mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged,
+                                .leftMouseDragged, .rightMouseDragged, .otherMouseDragged,
                                 .keyDown, .keyUp, .flagsChanged]
     let mask = types.reduce(CGEventMask(0)) { $0 | (CGEventMask(1) << $1.rawValue) }
     let callback: CGEventTapCallBack = { _, type, event, refcon in
@@ -97,7 +99,7 @@ final class EventTap {
     var e = InputEvent(kind: .mouseMove, x: Int(loc.x.rounded()), y: Int(loc.y.rounded()), timeMs: t)
     switch type {
     // Dragged events always pass: dropping them at the session tap freezes the cursor.
-    case .mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged: e.kind = .mouseMove
+    case .leftMouseDragged, .rightMouseDragged, .otherMouseDragged: e.kind = .mouseMove
     case .leftMouseDown: e.kind = .mouseDown; e.button = .left
     case .leftMouseUp: e.kind = .mouseUp; e.button = .left
     case .rightMouseDown: e.kind = .mouseDown; e.button = .right

@@ -101,7 +101,7 @@ EventTap ──InputEvent──▶ GestureMachine ──GestureOutput──▶ A
 
 ### 4.1 EventTap
 
-- 监听事件：鼠标左/右/其他键 down/up、mouseMoved、各类 dragged、keyDown/keyUp、flagsChanged。
+- 监听事件：鼠标左/右/其他键 down/up、各类 dragged、keyDown/keyUp、flagsChanged。不监听 mouseMoved：手势全程按住某个键，移动只会以 dragged 事件到达；不监听普通移动可避免每次指针移动都唤醒本 app。
 - 每个事件先用其 flags 推导修饰键的按下/抬起（移植 `feedFlags` / `modifierTransitions`），保证在「安全输入」（密码框）屏蔽键盘事件时修饰键状态仍正确。
 - 自己补发的事件写入 `eventSourceUserData = 0x4C50494E` 标记，回到 tap 时直接放行。
 - **拖动事件永远放行**（在会话层丢弃会冻结光标）。
