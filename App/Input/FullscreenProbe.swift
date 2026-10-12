@@ -1,8 +1,9 @@
 import AppKit
 import PingCore
 
-/// Is the topmost normal window under a global point a fullscreen app (a game)? Called only when a
-/// gesture would start, so the window list query (~1 ms) never runs on ordinary clicks.
+/// Is the topmost normal window under a global point a fullscreen game? Fullscreen browsers, video
+/// players and editors don't count (see GameDetection). Called only when a gesture would start, so the
+/// window list query (~1 ms) never runs on ordinary clicks.
 @MainActor
 enum FullscreenProbe {
   static func isFullscreen(x: Int, y: Int) -> Bool {
@@ -16,8 +17,12 @@ enum FullscreenProbe {
             let dict = w[kCGWindowBounds as String] as? NSDictionary,
             let bounds = CGRect(dictionaryRepresentation: dict),
             bounds.contains(p) else { continue }
-      return screens.contains { abs($0.minX - bounds.minX) < 1 && abs($0.minY - bounds.minY) < 1
+      let fillsScreen = screens.contains { abs($0.minX - bounds.minX) < 1 && abs($0.minY - bounds.minY) < 1
         && abs($0.width - bounds.width) < 1 && abs($0.height - bounds.height) < 1 }
+      guard fillsScreen, let pid = w[kCGWindowOwnerPID as String] as? pid_t,
+            let app = NSRunningApplication(processIdentifier: pid) else { return false }
+      let category = app.bundleURL.flatMap { Bundle(url: $0)?.object(forInfoDictionaryKey: "LSApplicationCategoryType") as? String }
+      return GameDetection.isGame(bundleID: app.bundleIdentifier, category: category)
     }
     return false
   }

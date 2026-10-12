@@ -145,6 +145,8 @@ final class GestureMachine {
 
 ### 4.3 FullscreenProbe
 
+**只对游戏生效**：铺满屏幕的窗口还必须属于游戏——其应用 Info.plist 的 `LSApplicationCategoryType` 以 `games` 结尾，或 bundle id 以 `com.riotgames.` 开头（`GameDetection`）。全屏浏览器、视频播放器、编辑器里照常可以打标记（2026-10-12 用户在副屏全屏 Dia 中无法打标记后修订）。
+
 `CGWindowListCopyWindowInfo(.optionOnScreenOnly)` 取点下最上层的普通窗口（layer 0），若其 bounds 等于所在屏幕 frame 即视为全屏。只在一次手势即将开始时查询（约 1 ms），普通点击不触发，因此不做缓存。
 
 ## 5. 覆盖层（Overlay）
