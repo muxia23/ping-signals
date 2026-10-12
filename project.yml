@@ -1,0 +1,60 @@
+name: PingSignals
+options:
+  bundleIdPrefix: com.muxia
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "ping-signals Local Signing"
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: NO
+targets:
+  PingCore:
+    type: framework
+    platform: macOS
+    sources: [Core]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.muxia.ping-signals.core
+        GENERATE_INFOPLIST_FILE: YES
+  PingSignals:
+    type: application
+    platform: macOS
+    sources: [App]
+    dependencies:
+      - target: PingCore
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleName: ping-signals
+        CFBundleDisplayName: ping-signals
+        LSUIElement: true
+        LSMinimumSystemVersion: "14.0"
+        NSHumanReadableCopyright: "MIT. Ported from darrenprx/lolPing. League of Legends assets © Riot Games."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.muxia.ping-signals
+        PRODUCT_NAME: ping-signals
+  PingCoreTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [Tests]
+    dependencies:
+      - target: PingCore
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.muxia.ping-signals.tests
+schemes:
+  PingSignals:
+    build:
+      targets:
+        PingSignals: all
+        PingCoreTests: [test]
+    test:
+      targets: [PingCoreTests]
