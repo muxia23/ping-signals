@@ -70,6 +70,14 @@ struct WheelArt {
   }
 
   /// Writes the idle frame and one frame per highlighted slice, side by side, as a PNG.
+  /// The wheel at rest, cut to the centre `fraction` of the canvas (the modern canvas has room for glow).
+  func idleImage(fraction: CGFloat = 1) -> CGImage {
+    let full = composite(hot: nil)
+    let side = CGFloat(full.width) * fraction
+    let origin = (CGFloat(full.width) - side) / 2
+    return full.cropping(to: CGRect(x: origin, y: origin, width: side, height: side)) ?? full
+  }
+
   func writePreview(to url: URL) throws {
     let frames = [composite(hot: nil)] + (0..<slots).map { composite(hot: $0) }
     let sheet = Drawing.image(size: CGSize(width: size.width * CGFloat(frames.count), height: size.height), scale: scale) { ctx in

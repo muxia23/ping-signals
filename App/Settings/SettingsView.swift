@@ -11,6 +11,6 @@ struct SettingsView: View {
       ActionsTab(model: model).tabItem { Label("Actions", systemImage: "bolt") }
       GeneralTab(model: model).tabItem { Label("General", systemImage: "gearshape") }
     }
-    .frame(width: 620, height: 560)
+    .frame(width: 620, height: 640)
   }
 }
