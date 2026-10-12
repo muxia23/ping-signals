@@ -1,6 +1,7 @@
 name: PingSignals
 options:
   bundleIdPrefix: com.muxia
+  developmentLanguage: en
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true

@@ -26,11 +26,11 @@ struct TodoPanelView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
       HStack {
-        Text("待办").font(.headline)
+        Text("Todo").font(.headline)
         Spacer()
         Button(action: onClose) { Image(systemName: "xmark") }.buttonStyle(.plain).foregroundStyle(.secondary)
       }
-      TextField("记点什么…（回车保存）", text: $draft.text)
+      TextField("Write something… (Return to save)", text: $draft.text)
         .textFieldStyle(.roundedBorder)
         .focused($inputFocused)
         .onSubmit {
@@ -45,7 +45,7 @@ struct TodoPanelView: View {
         LazyVStack(alignment: .leading, spacing: 8) {
           ForEach(store.open) { row($0) }
           if !store.done.isEmpty {
-            DisclosureGroup("已完成（\(store.done.count)）", isExpanded: $showDone) {
+            DisclosureGroup("Done (\(store.done.count))", isExpanded: $showDone) {
               ForEach(store.done) { row($0) }
             }
             .foregroundStyle(.secondary)
@@ -93,8 +93,8 @@ struct TodoPanelView: View {
     }
     .contentShape(Rectangle())
     .contextMenu {
-      Button("编辑") { editing = item.id; editText = item.text }
-      Button("删除", role: .destructive) { store.delete(item.id) }
+      Button("Edit") { editing = item.id; editText = item.text }
+      Button("Delete", role: .destructive) { store.delete(item.id) }
     }
   }
 

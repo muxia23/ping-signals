@@ -15,6 +15,13 @@ if let i = args.firstIndex(of: "--render-wheels"), i + 1 < args.count {
   exit(0)
 }
 
+// Language preference applies from launch (AppKit reads AppleLanguages once).
+switch SettingsStore().load().language {
+case .auto: UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+case .zhHans: UserDefaults.standard.set(["zh-Hans"], forKey: "AppleLanguages")
+case .en: UserDefaults.standard.set(["en"], forKey: "AppleLanguages")
+}
+
 let app = NSApplication.shared
 let delegate = AppDelegate()
 app.delegate = delegate

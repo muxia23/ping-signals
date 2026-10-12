@@ -25,10 +25,10 @@ final class MenuBarController: NSObject {
     item.button?.appearsDisabled = !enabled || needsPermission
     let menu = NSMenu()
     if needsPermission {
-      menu.addItem(entry("需要「辅助功能」权限… / Grant Accessibility…") { [actions] in actions.showOnboarding() })
+      menu.addItem(entry(String(localized: "Grant Accessibility…")) { [actions] in actions.showOnboarding() })
       menu.addItem(.separator())
     }
-    let toggle = entry(enabled ? "暂停 / Pause" : "启用 / Enable") { [actions] in actions.toggleEnabled() }
+    let toggle = entry(enabled ? String(localized: "Pause") : String(localized: "Enable")) { [actions] in actions.toggleEnabled() }
     if let key = KeyNames.menuKeyEquivalent(toggleHotkey.vk) {
       toggle.keyEquivalent = key
       var mask: NSEvent.ModifierFlags = []
@@ -41,28 +41,28 @@ final class MenuBarController: NSObject {
     menu.addItem(toggle)
 
     let styleMenu = NSMenu()
-    for (s, title) in [(WheelStyle.classic, "经典（2022）/ Classic"), (.modern, "新版 / Modern")] {
+    for (s, title) in [(WheelStyle.classic, String(localized: "Classic (2022)")), (.modern, String(localized: "Modern"))] {
       let i = entry(title) { [actions] in actions.setStyle(s) }
       i.state = s == style ? .on : .off
       styleMenu.addItem(i)
     }
-    let styleItem = NSMenuItem(title: "轮盘风格 / Wheel Style", action: nil, keyEquivalent: "")
+    let styleItem = NSMenuItem(title: String(localized: "Wheel Style"), action: nil, keyEquivalent: "")
     styleItem.submenu = styleMenu
     menu.addItem(styleItem)
 
     let previewMenu = NSMenu()
     let ids = PingCatalog.wheel(style: style, modernWheel: PingCatalog.defaultModernWheel) + [.generic]
-    for id in ids { previewMenu.addItem(entry(id.rawValue) { [actions] in actions.preview(id) }) }
-    let previewItem = NSMenuItem(title: "预览标记 / Preview Ping", action: nil, keyEquivalent: "")
+    for id in ids { previewMenu.addItem(entry(Names.ping(id)) { [actions] in actions.preview(id) }) }
+    let previewItem = NSMenuItem(title: String(localized: "Preview Ping"), action: nil, keyEquivalent: "")
     previewItem.submenu = previewMenu
     menu.addItem(previewItem)
 
     menu.addItem(.separator())
-    let settingsItem = entry("设置… / Settings…") { [actions] in actions.openSettings() }
+    let settingsItem = entry(String(localized: "Settings…")) { [actions] in actions.openSettings() }
     settingsItem.keyEquivalent = ","
     menu.addItem(settingsItem)
     menu.addItem(.separator())
-    menu.addItem(entry("退出 / Quit") { NSApp.terminate(nil) })
+    menu.addItem(entry(String(localized: "Quit")) { NSApp.terminate(nil) })
     item.menu = menu
   }
 
