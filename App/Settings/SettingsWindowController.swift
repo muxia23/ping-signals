@@ -5,11 +5,22 @@ import SwiftUI
 @MainActor
 final class SettingsWindowController {
   let model: SettingsModel
-  private var window: NSWindow?
+  private(set) var window: NSWindow?
+  private var tabs: NSTabViewController?
 
   init(model: SettingsModel) { self.model = model }
 
   func show() {
+    makeWindow()
+    model.settings.launchAtLogin = LaunchAtLogin.isEnabled   // the user may have changed it in System Settings
+    model.refreshShortcuts()
+    NSApp.activate()
+    window?.makeKeyAndOrderFront(nil)
+  }
+
+  func selectTab(_ index: Int) { tabs?.selectedTabViewItemIndex = index }
+
+  func makeWindow() {
     if window == nil {
       let tabs = NSTabViewController()
       tabs.tabStyle = .toolbar
@@ -33,10 +44,7 @@ final class SettingsWindowController {
       w.isReleasedWhenClosed = false
       w.center()
       window = w
+      self.tabs = tabs
     }
-    model.settings.launchAtLogin = LaunchAtLogin.isEnabled   // the user may have changed it in System Settings
-    model.refreshShortcuts()
-    NSApp.activate()
-    window?.makeKeyAndOrderFront(nil)
   }
 }

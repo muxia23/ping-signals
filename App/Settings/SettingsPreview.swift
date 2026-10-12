@@ -20,7 +20,26 @@ enum SettingsPreview {
     write(PingsSoundTab(model: model()), size, dir, "3-pings-sound")
     write(ActionsTab(model: model()), size, dir, "4-actions")
     write(GeneralTab(model: model { $0.language = .en }), size, dir, "5-general")
+    // The real window, title bar and toolbar included, one PNG per tab.
+    let controller = SettingsWindowController(model: model())
+    controller.makeWindow()
+    if let w = controller.window {
+      w.setFrameOrigin(NSPoint(x: -10000, y: -10000))
+      w.orderFrontRegardless()
+      for (i, name) in ["trigger", "wheel", "pings-sound", "actions", "general"].enumerated() {
+        controller.selectTab(i)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.4))
+        snapshot(w, dir.appendingPathComponent("window-\(name).png"))
+      }
+    }
     write(OnboardingView(), NSSize(width: 440, height: 420), dir, "onboarding")
+  }
+
+  private static func snapshot(_ window: NSWindow, _ url: URL) {
+    guard let frameView = window.contentView?.superview,
+          let rep = frameView.bitmapImageRepForCachingDisplay(in: frameView.bounds) else { return }
+    frameView.cacheDisplay(in: frameView.bounds, to: rep)
+    try? rep.representation(using: .png, properties: [:])?.write(to: url)
   }
 
   private static func write<V: View>(_ view: V, _ size: NSSize, _ dir: URL, _ name: String) {

@@ -1,65 +1,135 @@
 <div align="center">
 
-<img src="docs/images/icon.png" width="160" alt="ping-signals icon">
+<img src="docs/images/icon.png" width="128" alt="ping-signals">
 
 # ping-signals
 
-**把英雄联盟的标记轮盘搬到你的 Mac 桌面上，而且每个信号都会真的做点事。**
+### 把召唤师峡谷的信号，带到你的 Mac 桌面。
 
-按住 <kbd>⌥</kbd> 拖一下，召唤轮盘；松手，信号落地。
+按住 <kbd>⌥</kbd> 拖一下召唤轮盘，松手放出信号。每个信号都会替你做一件事。
 
-[![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)](#安装)
-[![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)](https://swift.org)
-[![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-native-1f6feb)](#性能)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![App size](https://img.shields.io/badge/app-2.5%20MB-brightgreen)](#性能)
+[![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?style=flat-square&logo=apple&logoColor=white)](#-安装)
+[![Swift 6](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
+[![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-native-1f6feb?style=flat-square)](#-轻到感觉不到)
+[![2.5 MB](https://img.shields.io/badge/app-2.5%20MB-2ea44f?style=flat-square)](#-轻到感觉不到)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 
-[English](README_EN.md) · **简体中文**
+**简体中文** · [English](README_EN.md)
 
-<img src="docs/images/classic-strip.png" width="800" alt="classic ping wheel, each direction highlighted">
+<br>
+
+<img src="docs/images/classic-strip.png" width="820" alt="经典轮盘的四个方向">
 
 </div>
 
----
-
-## ✨ 为什么做这个
-
-[lolPing](https://github.com/darrenprx/lolPing) 把召唤师峡谷的标记带到了桌面，很好玩，但它是 Electron 写的：常驻约 **490 MB** 内存，空闲时还占 7–12% CPU，安装包 175 MB。
-
-ping-signals 用纯 Swift 重写，只保留标记本身，再让标记变成**信号**：问号就只是一个问号，但「请求协助」会叫来 Claude，「危险」会帮你瞬间撤退到干净的桌面。
-
-## 🎯 信号一览
-
-| 标记 | 方向（经典） | 触发的动作 |
-|:---:|:---:|---|
-| ❗ **危险** | ↑ | **撤退**：一键隐藏所有窗口，只剩壁纸、Dock 和菜单栏。再打一次危险，一切原样回来 |
-| ⬇️ **正在路上** | → | **待办面板**：从屏幕右侧滑出，立刻可以输入。自动记下当时所在的应用、窗口标题和网页地址，点一下就能跳回去 |
-| 🚩 **请求协助** | ↓ | **呼叫 Claude**：打开 Claude 桌面版的快速输入框 |
-| ❓ **敌人消失** | ← | 什么都不做，就是一个单纯的问号 |
-| 📍 **普通标记** | <kbd>⌥</kbd> + 单击 | 只有动画和音效 |
-
-> 菜单栏里的预览永远不会触发动作，可以放心点着玩。
-
-## 🕹️ 两套轮盘
+<br>
 
 <table>
 <tr>
-<td align="center" width="50%">
-<img src="docs/images/classic-wheel.png" width="240"><br>
-<b>经典（2022 前）· 默认</b><br>
-<sub>4 格，熟悉的味道，原版 12.21 贴图与音效</sub>
+<td width="33%" valign="top">
+
+#### 🎯 信号，不只是表情
+「危险」一键撤退到干净桌面，「正在路上」滑出待办，「请求协助」叫来 Claude。
+
 </td>
-<td align="center" width="50%">
-<img src="docs/images/modern-wheel.png" width="240"><br>
-<b>新版</b><br>
-<sub>8 格：推进、全力进攻、需要视野、诱饵……</sub>
+<td width="33%" valign="top">
+
+#### 🧩 每个信号都能自定义
+运行快捷指令、按快捷键、打开应用或网址、跑一行 Shell。11 种标记，任你绑定。
+
+</td>
+<td width="33%" valign="top">
+
+#### 🪶 轻到感觉不到
+纯 Swift 原生实现。约 40 MB 内存，空闲 CPU 0.03%，整个应用 2.5 MB。
+
 </td>
 </tr>
 </table>
 
-## ⚡ 性能
+---
 
-同样是一个常驻菜单栏的标记工具：
+## 🎯 开箱即用的信号
+
+| | 标记 | 经典方向 | 默认动作 |
+|:---:|---|:---:|---|
+| ❗ | **危险** | ↑ | **撤退**：隐藏所有窗口，只留壁纸、Dock 和菜单栏。再打一次，一切原样回来 |
+| ⬇️ | **正在路上** | → | **待办面板**：从屏幕右侧滑出，直接输入。自动记下当时的应用、窗口标题和网页，点一下跳回去 |
+| 🚩 | **请求协助** | ↓ | **呼叫 Claude**：打开 Claude 桌面版的快速输入框 |
+| ❓ | **敌人消失** | ← | 不做任何事，它就是一个问号 |
+| 📍 | **标记** | <kbd>⌥</kbd> + 单击 | 只有动画和音效 |
+
+> 这些只是默认值。每个信号做什么，都可以在设置里改。
+
+## 🧩 自定义动作
+
+<div align="center">
+<img src="docs/images/settings-actions-zh.png" width="640" alt="设置窗口：动作">
+</div>
+
+每种标记可以绑定下面任意一种动作，旁边的「试一下」能立刻验证：
+
+| 动作 | 你需要提供 |
+|---|---|
+| 撤退 · 待办面板 · 呼叫 Claude | 无，内置 |
+| **运行快捷指令** | 从你的「快捷指令」列表里选一条 |
+| **按快捷键** | 录制一个组合键，比如唤出 Raycast、截图 |
+| **打开应用或网址** | 一个网址、`xxx://` 链接，或直接选一个应用 |
+| **运行 Shell 命令** | 一行命令，用 `zsh -l` 执行 |
+
+<details>
+<summary><b>快捷指令和 Shell 能拿到的上下文</b></summary>
+
+<br>
+
+Shell 命令以环境变量接收，快捷指令以 JSON 输入接收。拿不到的值会被省略。
+
+| 环境变量 | JSON 键 | 内容 |
+|---|---|---|
+| `PING_ID` | `ping` | 标记 ID，如 `danger`、`missing` |
+| `PING_STYLE` | `style` | `classic` / `modern` |
+| `PING_X` / `PING_Y` | `x` / `y` | 打标记的位置（全局坐标） |
+| `FRONT_APP` | `app` | 前台应用名称 |
+| `FRONT_BUNDLE_ID` | `bundleID` | 前台应用 bundle id |
+| `WINDOW_TITLE` | `windowTitle` | 前台窗口标题 |
+| `FRONT_URL` | `url` | 浏览器当前网址（Safari / Chrome / Arc / Edge / Brave） |
+
+</details>
+
+<details>
+<summary><b>几个配方</b></summary>
+
+<br>
+
+**问号 → 把疑问记下来**
+
+```sh
+echo "- $(date '+%F %T') $FRONT_APP · $WINDOW_TITLE $FRONT_URL" >> ~/Documents/questions.md
+```
+
+**问号 → 念出来**（试试手感）
+
+```sh
+say "$PING_ID"
+```
+
+**全力进攻 → 进入专注**：「运行快捷指令」，选一条打开专注模式的快捷指令。
+
+**需要视野 → 截图**：「按快捷键」，录制 <kbd>⌘</kbd><kbd>⇧</kbd><kbd>4</kbd>。
+
+</details>
+
+## 🕹️ 两套轮盘
+
+<div align="center">
+<img src="docs/images/settings-wheel-zh.png" width="640" alt="设置窗口：轮盘">
+</div>
+
+**经典（2022 前）**是默认：4 格，原汁原味的 12.21 贴图与音效。**新版**有 8 格：推进、全力进攻、需要视野、诱饵……在设置里点一下图片就能切换。
+
+## 🪶 轻到感觉不到
+
+同样是常驻菜单栏的标记工具：
 
 | | lolPing（Electron） | **ping-signals** |
 |---|---:|---:|
@@ -67,23 +137,27 @@ ping-signals 用纯 Swift 重写，只保留标记本身，再让标记变成**�
 | 空闲 CPU | 7–12% | **0.03%** |
 | 应用体积 | 343 MB | **2.5 MB** |
 
-<sub>M1 Pro / macOS，用 `scripts/measure.sh` 测量。</sub>
+<sub>M1 Pro，`scripts/measure.sh` 测量。</sub>
 
-省下来的地方：不监听普通鼠标移动（只在按住触发键时才有事件），浮层窗口只在用的时候才出现，音频引擎单独排队，贴图按需裁剪。
+秘诀很朴素：不监听普通的鼠标移动，只在按住触发键时才处理事件；浮层窗口只在用的时候才出现；贴图只保留画得到的像素。
 
-## 🧠 贴心细节
+## ✨ 细节
 
-- **全屏游戏里自动让路**：前台是全屏游戏（比如真的在打 LoL）时，<kbd>⌥</kbd> + 点击原样放行；全屏的浏览器、视频、编辑器里照样能打标记。
-- **不吞你的点击**：<kbd>⌥</kbd> + 单击没拖动，会把原来的点击原样补发给下面的应用。
-- **随时暂停**：<kbd>⌃</kbd><kbd>⌥</kbd><kbd>P</kbd> 暂停 / 恢复，菜单栏图标会变灰。
-- **多屏友好**：撤退时每块屏幕都铺上它自己的壁纸。
+- **全屏游戏里自动让路**：前台是全屏游戏时，<kbd>⌥</kbd> + 点击原样放行；全屏的浏览器、视频、编辑器照样能打标记。
+- **不吞你的点击**：<kbd>⌥</kbd> + 单击没拖动，原来的点击会补发给下面的应用。
+- **随时暂停**：默认 <kbd>⌃</kbd><kbd>⌥</kbd><kbd>P</kbd>，可以在设置里重新录制。
+- **都能改**：触发键（⌥ / ⌃ / ⇧ / ⌘ / 鼠标侧键 / 任意按键）、拖动距离、标记大小与时长、音量。
+- **多屏友好**：撤退时每块屏幕铺上它自己的壁纸。
 - **权限被收回也不怕**：辅助功能权限被撤销或事件监听被系统停掉，会自动发现并恢复。
+- **中英双语**，开机自启，首次启动有引导。
+
+## 🔒 隐私
+
+ping-signals 不联网，也不记录你的输入。「辅助功能」权限只用来识别触发键和鼠标手势；「自动化」权限只在需要时读取浏览器当前网址，拒绝也不影响使用。
 
 ## 📦 安装
 
-> 还没有发布正式版本，目前需要从源码构建。
-
-需要 macOS 14+、Xcode 16+ 和 [XcodeGen](https://github.com/yonaskolb/XcodeGen)。
+> 还没有发布正式版本，目前需要从源码构建（需要 macOS 14+、Xcode 16+）。
 
 ```bash
 git clone https://github.com/muxia23/ping-signals.git
@@ -98,34 +172,41 @@ xcodebuild build -project PingSignals.xcodeproj -scheme PingSignals \
 open build/Build/Products/Release/ping-signals.app
 ```
 
-首次启动时按提示授予**辅助功能**权限（用来监听 <kbd>⌥</kbd> + 拖动）。「正在路上」第一次读取浏览器网址时，系统会请求**自动化**权限，拒绝也不影响保存待办。
+首次启动会出现引导窗口，按提示打开「辅助功能」权限即可，窗口会自己关掉。
 
-## 🏗️ 项目结构
+<details>
+<summary><b>开发者</b></summary>
+
+<br>
 
 ```
-Core/      PingCore：纯逻辑（手势状态机、轮盘几何、标记目录、信号总线、待办存储、撤退计划）
-App/       系统交互（事件监听、浮层、轮盘绘制、动画、音频、菜单栏、各个动作）
+Core/      PingCore：纯逻辑（手势状态机、轮盘几何、标记目录、动作配置、信号总线、待办、撤退）
+App/       系统交互（事件监听、浮层、轮盘绘制、动画、音频、菜单栏、动作执行、设置窗口）
 Tests/     Swift Testing 单元测试
-scripts/   签名证书、素材导入、性能测量
+scripts/   签名证书、素材导入、图标绘制、性能测量
 docs/      设计文档与实现计划
 ```
 
-所有能脱离系统运行的逻辑都在 `PingCore` 里，并有单元测试：
-
 ```bash
+# 测试
 xcodebuild test -project PingSignals.xcodeproj -scheme PingSignals \
   -destination 'platform=macOS,arch=arm64' -derivedDataPath build
+
+# 导出轮盘 / 设置窗口预览图
+ping-signals.app/Contents/MacOS/ping-signals --render-wheels <dir>
+ping-signals.app/Contents/MacOS/ping-signals --render-settings <dir>
 ```
+
+</details>
 
 ## 🗺️ 路线图
 
 - [x] 经典 / 新版两套轮盘，动画与音效
 - [x] 信号动作：撤退、待办面板、呼叫 Claude
-- [ ] 设置窗口：触发键、拖动阈值、新版轮盘自定义、暂停快捷键录制
-- [ ] 首次引导、开机自启
-- [ ] 中英文界面
+- [x] 自定义动作：快捷指令、快捷键、应用 / 网址、Shell
+- [x] 设置窗口、首次引导、开机自启、中英双语
 - [ ] 自动更新（Sparkle）与正式发布
-- [ ] 更多信号：「问号」记录下当时的疑问……
+- [ ] 待办面板的更多玩法
 
 ## 🙏 致谢
 
@@ -138,6 +219,10 @@ xcodebuild test -project PingSignals.xcodeproj -scheme PingSignals \
 
 ping-signals 不受 Riot Games 认可，也不代表 Riot Games 或任何参与制作或管理《英雄联盟》的人员的观点或意见。《英雄联盟》及 Riot Games 是 Riot Games, Inc. 的商标或注册商标。标记贴图与音效版权归 Riot Games, Inc. 所有。
 
+<br>
+
 <div align="center">
+<img src="docs/images/icon.png" width="48" alt="">
+<br>
 <sub>如果它让你会心一笑，点个 ⭐ 吧。</sub>
 </div>
