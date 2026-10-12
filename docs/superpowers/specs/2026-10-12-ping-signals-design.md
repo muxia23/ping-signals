@@ -19,6 +19,7 @@
 - 自动更新（Sparkle 2 + GitHub Releases）
 - 中英双语界面
 - 全屏应用中放行点击（原版仅 Windows 有效，本版实现 macOS 版）
+- **轮盘风格切换**：「经典（2022）」= 12.22 改版前的 4 格轮盘与老版标记素材（默认）；「新版」= 现行 8 格轮盘（见 5.6 节）
 
 **移除**
 
@@ -84,7 +85,10 @@ EventTap ──InputEvent──▶ GestureMachine ──GestureOutput──▶ A
 | `Audio/SoundPlayer.swift` | 预加载与播放音效 | — |
 | `Signals/PingSignal.swift` | `PingSignal`、`SignalHandler`、`SignalBus` | — |
 | `Signals/PingEffectHandler.swift` | v1 唯一处理器：动画 + 音效 | PingAnimator, SoundPlayer |
-| `Model/PingCatalog.swift` | 11 种标记定义（id、贴图、音效、颜色） | — |
+| `Model/PingCatalog.swift` | 两种风格的标记定义（id、贴图、音效、颜色）与各自的默认轮盘 | — |
+| `Model/WheelStyle.swift` | `WheelStyle`（`.classic` / `.modern`）：格数、轮盘绘制器、标记动画器、单击标记 | PingCatalog |
+| `Overlay/ClassicWheelView.swift` | 用老版图集拼出 4 格轮盘 | WheelGeometry |
+| `Overlay/ClassicPingAnimator.swift` | 老版标记动画（图标 + 底座光环） | PingCatalog |
 | `Model/Settings.swift` | 设置结构、默认值、校验、`UserDefaults` 持久化 | — |
 | `App/AppCoordinator.swift` | 串联各模块，响应设置变化 | 全部 |
 | `App/MenuBarController.swift` | 菜单栏图标与菜单 | — |
@@ -157,10 +161,13 @@ final class GestureMachine {
 常量（与 `src/shared/geometry.ts` 一致，单位 pt）：`innerR 86, outerR 188, extR 288, iconR 137, iconSize 48`。
 
 ```swift
-// 偏移 (dx, dy)，屏幕坐标 y 向下。死区内返回 nil，否则 0...7（0 = 北，顺时针）
-func pickSlice(dx: CGFloat, dy: CGFloat, deadZone: CGFloat = innerR) -> Int?
-// deg = (atan2(dy, dx)·180/π + 90 + 22.5 + 360) mod 360; slice = floor(deg/45) mod 8
+// 偏移 (dx, dy)，屏幕坐标 y 向下。死区内返回 nil，否则 0..<slots（0 = 北，顺时针）
+func pickSlice(dx: CGFloat, dy: CGFloat, slots: Int, deadZone: CGFloat) -> Int?
+// span = 360/slots; deg = (atan2(dy, dx)·180/π + 90 + span/2 + 360) mod 360; slice = floor(deg/span) mod slots
+// 新版 slots = 8（与原版 geometry.ts 一致），经典 slots = 4（每格 90°，正对上右下左）
 ```
+
+以下 5.2、5.3 描述「新版」风格；「经典」风格见 5.6 节。
 
 绘制（`CAShapeLayer` / `CAGradientLayer(type: .radial)`），复刻 `wheel.ts`：
 
@@ -189,11 +196,53 @@ func pickSlice(dx: CGFloat, dy: CGFloat, deadZone: CGFloat = innerR) -> Int?
 
 ### 5.4 SoundPlayer
 
-启动时把 12 个用到的音效（11 种标记 + `button`）解码为 `AVAudioPCMBuffer`；`AVAudioEngine` 带 8 个 `AVAudioPlayerNode` 组成的播放池，最多同时 8 个声音，超出则跳过（标记照常显示）。音量 = `volume / 100`，静音时不播放。
+启动时把两种风格用到的 13 个音效（新版 11 种标记 + 经典的 `GetBack` + `button`）解码为 `AVAudioPCMBuffer`；`AVAudioEngine` 带 8 个 `AVAudioPlayerNode` 组成的播放池，最多同时 8 个声音，超出则跳过（标记照常显示）。音量 = `volume / 100`，静音时不播放。
 
 ### 5.5 素材
 
-从 `lolping-fork/assets` 只复制 `PingCatalog` 引用的贴图（约 20 个 PNG，约 0.5 MB）和 12 个音效。音效用 `afconvert -f m4af -d aac` 转换为 `.m4a`。
+- 新版：从 `lolping-fork/assets` 只复制 `PingCatalog` 引用的贴图（约 20 个 PNG，约 0.5 MB）。
+- 经典：从 `reference/classic-12.21/`（CommunityDragon 12.21 存档）复制图集与场景标记贴图（约 0.6 MB）。
+- 音效：两种风格用到的全部音效（新版 12 个 + 经典额外的 `GetBack`），用 `afconvert -f m4af -d aac` 转为 `.m4a`。
+
+### 5.6 经典风格（2022，12.22 改版前）
+
+**标记（4 格固定，不可编辑）**
+
+| 方向 | 标记 | 轮盘图标（图集裁切） | 场景图标 / 底座 | 音效 | 颜色 |
+|---|---|---|---|---|---|
+| 上 | 危险 | `!` (467,70,26,52) | `ping-danger.png` / `ping-danger-base.png`（三角） | `GetBack`* | #e8322f |
+| 右 | 正在路上 | 箭头 (389,70,54,52) | `ping-omw_02.png` + `ping-omw-arrow.png` / `ping-omw-base.png` | `OnMyWay` | #1fb38a |
+| 下 | 请求协助 | 旗子 (464,6,46,52) | `ping-comehere_02.png` / `ping-comehere-base.png` | `ComeHere` | #2e9bd6 |
+| 左 | 敌人消失 | `?` (400,6,32,52) | `ping-mia_02.png` / `ping-mia-base.png` + `ping-mia-base-outer.png` | `MIA` | #f0b030 |
+| 单击 | 普通标记 | — | `sr_pings_blue_02.png` / `ping-command-base.png` | `Base` | #2e9bd6 |
+
+\* 老版危险音效推定为 `GetBack`（12.21 音效文件无公开存档，无法逐字节核对），实现后由用户试听确认；不对则改用其他候选。颜色取自对应 `*-color.png` 渐变条的主色，实现时用取色脚本确定精确值。
+
+**轮盘（`ClassicWheelView`）**：由 `contextwheel_atlas.png`（512×512）的切片拼装。切片坐标（x, y, w, h）：
+
+| 切片 | 坐标 | 用途 |
+|---|---|---|
+| 边框四分之一（常态） | (1,1,142,142) | 旋转 0/90/180/270° 拼成整圈金色边框 |
+| 边框四分之一（备选） | (170,1,142,142) | 另一种状态，拼装预览时确定用途 |
+| 大扇区·上（常态 / 高亮） | (1,144,166,105) / (169,145,166,115) | 上、下方向的高亮扇区（下方向旋转 180°） |
+| 大扇区·侧（常态 / 高亮） | (1,251,105,166) / (172,263,115,166) | 左、右方向的高亮扇区（右方向水平翻转） |
+| 小扇区·上 / 侧 | (347,134,87,56) / (442,135,56,87) | 备选尺寸，拼装预览时确定是否使用 |
+| 底盘（带十字分隔） | (373,228,135,135) | 轮盘背景，按需着色 |
+| 底盘阴影 | (371,371,140,140) | 背景下的阴影 |
+| 中心圆 | (0,426,86,86) | 中心底 |
+| 中心 ✕ 按钮（常态 / 高亮） | (96,448,60,60) / (166,448,60,60) | 死区（取消）提示；死区内时显示高亮 |
+| 环 | (299,268,68,68)、(299,343,40,40) | 备选装饰 |
+
+- 拼装方式与缩放比例**先产出预览图（静态 PNG：常态 + 4 个方向各高亮一次），经用户确认后**再接入覆盖层。
+- 死区半径 = 中心圆半径（按最终缩放换算）；4 个图标分别位于上右下左的扇区中心。
+- 高亮变化时播放提示音 `button`（与新版共用开关）。
+
+**场景标记动画（`ClassicPingAnimator`）**：老版是游戏粒子特效，无法取得参数，按老版观感近似复刻：
+
+- 底座光环：贴图用标记颜色着色（底座贴图为白色灰度），从 scale 0.6 放大到 1.0 并淡入（0.2 s），持续发光，最后 15 % 时长淡出。敌人消失额外叠加 `ping-mia-base-outer` 外圈，缓慢放大淡出。
+- 图标：从上方 0.3·size 处落下到底座上方（0.25 s，回弹曲线），之后 ±4 pt 上下浮动，周期 1.6 s；正在路上的箭头额外做一次向前（右上）位移脉冲。
+- 大小与时长沿用 `pingSizePx` / `pingDurationS`。
+- 动画效果同样先出预览（录屏或逐帧图）给用户确认。
 
 ## 6. 信号接口（Signals）
 
@@ -239,9 +288,10 @@ struct Settings: Codable, Equatable {
   var trigger: Trigger = .option
   var dragThresholdPx = 8          // 2...40
   var clickPing = false
-  var clickPingID: PingID = .generic
+  var style: WheelStyle = .classic   // .classic（4 格固定）/ .modern（8 格可编辑）
+  var clickPingID: PingID = .generic // 仅新版使用；经典固定为普通标记
   var gameCheck = true
-  var wheel: [PingID] = [.danger, .push, .omw, .allin, .assist, .needvision, .missing, .enemyvision]
+  var wheel: [PingID] = [.danger, .push, .omw, .allin, .assist, .needvision, .missing, .enemyvision] // 仅新版
   var toggleHotkey = Hotkey(mods: [.control, .option], key: .p)
   var pingSizePx = 110             // 60...220
   var pingDurationS = 3.2          // 1...8，步长 0.1
@@ -263,7 +313,7 @@ struct Settings: Codable, Equatable {
 分组：
 
 1. **触发**：触发键选择（⌥ / ⌃ / ⇧ / ⌘ / 鼠标 4 / 鼠标 5 / 录制自定义按键）、拖动阈值滑块、「触发键 + 单击放标记」开关、全屏应用中暂停开关。
-2. **轮盘**：圆形编辑器，8 格 + 中心（中心 = 单击放的标记）。从下方 11 种标记池拖到格子；格子间拖动互换；拖到已存在的标记时两格互换（移植 `placeOnSlot` / `swapSlots` / `dropPatch`）。单击某个标记预览动画。「恢复默认」按钮。
+2. **轮盘**：顶部为风格切换（经典（2022） / 新版），切换立即生效。经典风格下只显示 4 格的只读预览（单击某格预览动画）；新版风格下显示圆形编辑器，8 格 + 中心（中心 = 单击放的标记）。从下方 11 种标记池拖到格子；格子间拖动互换；拖到已存在的标记时两格互换（移植 `placeOnSlot` / `swapSlots` / `dropPatch`）。单击某个标记预览动画。「恢复默认」按钮。
 3. **标记与声音**：大小、时长、音量滑块，静音、轮盘提示音开关。
 4. **应用**：暂停快捷键录制、开机自启、自动检查更新 + 「立即检查」、语言、版本号。
 
@@ -299,7 +349,8 @@ struct Settings: Codable, Equatable {
 ### 9.1 自动测试（Swift Testing）
 
 - `GestureMachineTests`：从 `native/hook-helper/tests/helper_tests.cpp` 移植与平台无关、与单轮盘相关的用例（拖动开轮盘、阈值、单击补发、clickPing、Esc / 右键取消、foreignKey、暂停快捷键、看门狗、syncKeyStates、自定义键 / 侧键触发、gameCheck 探针）。
-- `WheelGeometryTests`：8 个方向 + 扇区边界 ±22.5° + 死区。
+- `WheelGeometryTests`：slots = 8（8 个方向、边界 ±22.5°）与 slots = 4（4 个方向、边界 ±45°）+ 死区。
+- `WheelStyleTests`：经典 4 格映射（上危险 / 右正在路上 / 下请求协助 / 左敌人消失）、单击标记，以及风格切换后轮盘内容与格数随之改变。
 - `SettingsTests`：默认值、缺字段回落、越界裁剪、非法 wheel 回落、快捷键校验。
 - `WheelEditTests`：`placeOnSlot` / `swapSlots` / `dropPatch`。
 - `SignalBusTests`：注册顺序、多处理器分发。
@@ -307,7 +358,7 @@ struct Settings: Codable, Equatable {
 ### 9.2 手动清单
 
 1. 首次启动 → 引导授权 → 授权后无需重启即可使用
-2. ⌥ + 拖动出现轮盘，8 个方向分别高亮并放出正确标记与音效；死区松开取消
+2. ⌥ + 拖动出现轮盘：经典风格 4 个方向、新版风格 8 个方向分别高亮并放出正确标记与音效；死区松开取消；设置中切换风格后立即生效
 3. Esc / 右键取消；⌥ + 普通单击在其他应用中正常生效（补发）
 4. 开启「⌥ + 单击放标记」后单击直接放标记
 5. 全屏应用（如全屏 LoL / 全屏视频）中 ⌥ + 点击不被拦截
@@ -322,5 +373,8 @@ struct Settings: Codable, Equatable {
 用 `footprint` 汇总内存，用 `ps` 的 CPU 时间差计算 60 s 平均 CPU，测量方法与 Electron 版基线相同，结果需满足 1.2 节的目标。
 
 ## 10. 待定事项
+
+- **经典危险音效**：推定为 `GetBack`，需试听确认。
+- **经典轮盘拼装细节与动画观感**：以预览图 / 预览录屏经用户确认为准。
 
 - **正式名称与 bundle identifier**：首次发布（创建 GitHub 仓库）前确定；确定后不再更改（更改会导致授权与更新失效）。在此之前使用 `ping-signals` / `com.muxia.ping-signals`。
