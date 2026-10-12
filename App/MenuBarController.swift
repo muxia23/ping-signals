@@ -17,7 +17,10 @@ final class MenuBarController: NSObject {
   init(actions: Actions) {
     self.actions = actions
     super.init()
-    item.button?.image = NSImage(systemSymbolName: "exclamationmark.bubble.fill", accessibilityDescription: "ping-signals")
+    let icon = NSImage(named: "MenuBarIcon")
+    icon?.isTemplate = true   // tinted for light and dark menu bars
+    icon?.accessibilityDescription = "ping-signals"
+    item.button?.image = icon
   }
 
   /// Rebuilds the menu for the current state.
