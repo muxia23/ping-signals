@@ -60,6 +60,9 @@ enum SettingsPreview {
     write(TodoPanelView(draft: chips, store: TodoStore(fileURL: file.appendingPathExtension("empty")), onClose: {},
                         onOpenSource: { _ in }), panelSize, dir, "todo-empty-chips")
     try? FileManager.default.removeItem(at: file)
+    write(DueEditor(due: cal.date(bySettingHour: 18, minute: 0, second: 0, of: cal.date(byAdding: .day, value: 1, to: today)!), hasTime: true) { _, _ in },
+          NSSize(width: 256, height: 420), dir, "todo-due-editor")
+    write(PriorityPicker(selection: .high) { _ in }, NSSize(width: 170, height: 150), dir, "todo-priority-picker")
     write(OnboardingView(), NSSize(width: 440, height: 420), dir, "onboarding")
   }
 

@@ -339,7 +339,7 @@ private struct Chip: View {
   }
 }
 
-private struct PriorityPicker: View {
+struct PriorityPicker: View {
   let selection: TodoPriority?
   let onPick: (TodoPriority?) -> Void
 
@@ -353,6 +353,7 @@ private struct PriorityPicker: View {
     }
     .padding(8)
     .frame(width: 170)
+    .background(Color(nsColor: .windowBackgroundColor))
   }
 
   private func option(_ title: String, color: Color, selected: Bool, _ action: @escaping () -> Void) -> some View {
@@ -371,11 +372,13 @@ private struct PriorityPicker: View {
 }
 
 /// Quick dates, a calendar and an optional time.
-private struct DueEditor: View {
+struct DueEditor: View {
   let onSet: (Date?, Bool) -> Void
   @State private var day: Date
   @State private var withTime: Bool
   @State private var time: Date
+
+  private static let presetHours = [9, 12, 18, 21]
 
   init(due: Date?, hasTime: Bool, onSet: @escaping (Date?, Bool) -> Void) {
     self.onSet = onSet
@@ -386,31 +389,57 @@ private struct DueEditor: View {
   }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 10) {
+    let cal = Calendar.current
+    VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 6) {
         ForEach(TodoStyle.quickDates(now: Date()), id: \.title) { q in
-          Button(q.title) { day = q.date }
-            .buttonStyle(.bordered).controlSize(.small)
+          TodoPill(title: q.title, selected: cal.isDate(day, inSameDayAs: q.date)) { day = q.date }
         }
       }
       DatePicker("", selection: $day, displayedComponents: .date)
         .datePickerStyle(.graphical)
         .labelsHidden()
-      HStack {
-        Toggle("Add time", isOn: $withTime).toggleStyle(.switch).controlSize(.small)
+        .focusEffectDisabled()
+        .frame(maxWidth: .infinity)
+      Divider()
+      HStack(spacing: 8) {
+        Label("Time", systemImage: "clock").foregroundStyle(.secondary)
         Spacer()
         if withTime {
-          DatePicker("", selection: $time, displayedComponents: .hourAndMinute).labelsHidden()
+          DatePicker("", selection: $time, displayedComponents: .hourAndMinute)
+            .datePickerStyle(.field)
+            .labelsHidden()
+            .focusEffectDisabled()
+            .fixedSize()
+          Button { withTime = false } label: { Image(systemName: "xmark.circle.fill") }
+            .buttonStyle(.plain).foregroundStyle(.tertiary)
+        } else {
+          Button("Add Time") { withTime = true }.buttonStyle(.plain).foregroundStyle(.tint)
+        }
+      }
+      .font(.callout)
+      if withTime {
+        HStack(spacing: 6) {
+          ForEach(Self.presetHours, id: \.self) { h in
+            TodoPill(title: String(format: "%02d:00", h),
+                     selected: cal.component(.hour, from: time) == h && cal.component(.minute, from: time) == 0) {
+              time = cal.date(bySettingHour: h, minute: 0, second: 0, of: time) ?? time
+            }
+          }
         }
       }
       HStack {
-        Button("Clear") { onSet(nil, false) }
+        Button("Clear") { onSet(nil, false) }.buttonStyle(.plain).foregroundStyle(.secondary)
         Spacer()
-        Button("Done", action: commit).keyboardShortcut(.defaultAction)
+        Button("Done", action: commit)
+          .buttonStyle(.borderedProminent)
+          .keyboardShortcut(.defaultAction)
       }
+      .font(.callout)
     }
-    .padding(12)
-    .frame(width: 260)
+    .padding(14)
+    .frame(width: 256)
+    .background(Color(nsColor: .windowBackgroundColor))
   }
 
   private func commit() {
@@ -419,6 +448,27 @@ private struct DueEditor: View {
     guard withTime else { onSet(start, false); return }
     let hm = cal.dateComponents([.hour, .minute], from: time)
     onSet(cal.date(bySettingHour: hm.hour ?? 18, minute: hm.minute ?? 0, second: 0, of: start) ?? start, true)
+  }
+}
+
+/// A small capsule choice: filled with the accent colour when selected.
+private struct TodoPill: View {
+  let title: String
+  let selected: Bool
+  let action: () -> Void
+
+  var body: some View {
+    Button(action: action) {
+      Text(title)
+        .font(.caption.weight(.medium).monospacedDigit())
+        .lineLimit(1)
+        .fixedSize()
+        .padding(.horizontal, 9).padding(.vertical, 4)
+        .background(Capsule().fill(selected ? Color.accentColor : Color.primary.opacity(0.07)))
+        .foregroundStyle(selected ? Color.white : Color.primary)
+        .contentShape(Capsule())
+    }
+    .buttonStyle(.plain)
   }
 }
 

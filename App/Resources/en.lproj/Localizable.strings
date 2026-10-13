@@ -93,9 +93,10 @@
 "Next Monday" = "Next Monday";
 "Overdue" = "Overdue";
 "Overdue %lld days" = "Overdue %lld days";
-"Add time" = "Add time";
 "Clear" = "Clear";
 "Done" = "Done";
 "All clear" = "All clear";
 "Type above and press Return. Try “Send report !high @fri”." = "Type above and press Return. Try “Send report !high @fri”.";
 "Todo due" = "Todo due";
+"Time" = "Time";
+"Add Time" = "Add Time";

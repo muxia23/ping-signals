@@ -93,9 +93,10 @@
 "Next Monday" = "下周一";
 "Overdue" = "已逾期";
 "Overdue %lld days" = "逾期 %lld 天";
-"Add time" = "加上时间";
 "Clear" = "清除";
 "Done" = "完成";
 "All clear" = "全部搞定";
 "Type above and press Return. Try “Send report !high @fri”." = "在上方输入后回车。试试「交报告 !高 @周五」。";
 "Todo due" = "待办到期";
+"Time" = "时间";
+"Add Time" = "添加时间";
