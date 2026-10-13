@@ -12,6 +12,7 @@ final class AppCoordinator {
   private let gate = AccessibilityGate()
   private let todoStore = TodoStore(fileURL: TodoStore.defaultURL)
   private lazy var todoPanel = TodoPanelController(store: todoStore)
+  private let reminders = TodoReminders()
   private var tap: EventTap!
   private var runner: ActionRunner!
   private var menu: MenuBarController!
@@ -32,6 +33,9 @@ final class AppCoordinator {
     runner = ActionRunner(retreat: RetreatAction(), todoPanel: TodoPanelAction(panel: todoPanel),
                           claude: ClaudeQuickEntryAction())
     bus.register(ActionRouter(runner: runner) { [weak self] in self?.settings.actions ?? PingActions.defaults })
+    reminders.onOpen = { [weak self] in self?.showTodoPanel() }
+    todoStore.onChange = { [weak self] items in self?.reminders.sync(items) }
+    reminders.sync(todoStore.items)
     machine.fullscreenProbe = { x, y in MainActor.assumeIsolated { FullscreenProbe.isFullscreen(x: x, y: y) } }
     tap.apply(machine.setConfig(settings.gestureConfig(enabled: settings.enabledOnStart)))
     refreshWheelArt()
@@ -155,6 +159,12 @@ final class AppCoordinator {
   }()
 
   private func openSettings() { settingsWindow.show() }
+
+  /// From a reminder: the panel on the main screen, without a fresh context.
+  private func showTodoPanel() {
+    guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
+    todoPanel.show(on: screen, context: TodoContext())
+  }
 
   /// Key recording must see the keys the gesture machine would otherwise act on (e.g. the pause shortcut).
   private func setRecording(_ on: Bool) { tap.apply(machine.setSuspended(on)) }
