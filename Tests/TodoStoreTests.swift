@@ -66,4 +66,56 @@ import Testing
   @Test func missingFileIsEmpty() {
     #expect(TodoStore(fileURL: file).items.isEmpty)
   }
+
+  // MARK: priority / DDL
+
+  @Test func oldJSONWithoutNewKeysLoadsUnchanged() throws {
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    let json = """
+    [{"id":"\(UUID().uuidString)","text":"old","createdAt":"1970-01-01T00:00:05Z"}]
+    """
+    try Data(json.utf8).write(to: file)
+    let item = TodoStore(fileURL: file).items[0]
+    #expect(item.priority == nil && item.due == nil && item.dueHasTime == false)
+  }
+
+  @Test func newFieldsRoundTrip() {
+    let s = TodoStore(fileURL: file)
+    s.add("x", context: ctx, priority: .high, due: t(5000), dueHasTime: true, now: t(1))
+    let back = TodoStore(fileURL: file)
+    #expect(back.items == s.items)
+    #expect(back.items[0].priority == .high && back.items[0].due == t(5000) && back.items[0].dueHasTime)
+  }
+
+  @Test func openSortsByPriorityThenDueThenNewest() {
+    let s = TodoStore(fileURL: file)
+    s.add("none-old", context: ctx, now: t(1))
+    s.add("low", context: ctx, priority: .low, now: t(2))
+    s.add("med", context: ctx, priority: .medium, now: t(3))
+    s.add("high-late", context: ctx, priority: .high, due: t(900), now: t(4))
+    s.add("high-early", context: ctx, priority: .high, due: t(100), now: t(5))
+    s.add("high-nodue-a", context: ctx, priority: .high, now: t(6))
+    s.add("high-nodue-b", context: ctx, priority: .high, now: t(7))
+    s.add("none-new", context: ctx, now: t(8))
+    #expect(s.open.map(\.text) == ["high-early", "high-late", "high-nodue-b", "high-nodue-a",
+                                   "med", "low", "none-new", "none-old"])
+  }
+
+  @Test func setPriorityAndDuePersistAndNotify() {
+    let s = TodoStore(fileURL: file)
+    var calls: [Int] = []
+    s.onChange = { calls.append($0.count) }
+    let a = s.add("a", context: ctx, now: t(1))!
+    s.setPriority(a.id, .medium)
+    s.setDue(a.id, t(777), hasTime: true)
+    #expect(calls == [1, 1, 1])
+    var back = TodoStore(fileURL: file).items[0]
+    #expect(back.priority == .medium && back.due == t(777) && back.dueHasTime)
+    s.setDue(a.id, nil, hasTime: true)
+    s.setPriority(a.id, nil)
+    back = TodoStore(fileURL: file).items[0]
+    #expect(back.priority == nil && back.due == nil && back.dueHasTime == false)
+    s.toggleDone(a.id); s.edit(a.id, text: "b"); s.delete(a.id)
+    #expect(calls.count == 8)
+  }
 }
