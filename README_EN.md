@@ -54,12 +54,21 @@ Native Swift. About 25 MB of memory and under 0.2% CPU at idle, and a download u
 | | Ping | Classic direction | Default action |
 |:---:|---|:---:|---|
 | ❗ | **Danger** | ↑ | **Retreat**: hides every window, leaving the wallpaper, Dock and menu bar. Ping again and everything comes back |
-| ⬇️ | **On My Way** | → | **Todo panel**: slides in from the right, ready to type. Records the app, window title and web page you were on; click to jump back |
+| ⬇️ | **On My Way** | → | **Todo panel**: slides in from the right, ready to type. Records the app, window title and web page you were on; click to jump back. Priorities, due dates and reminders |
 | 🚩 | **Assist Me** | ↓ | **Call Claude**: opens Claude desktop's Quick Entry |
 | ❓ | **Enemy Missing** | ← | Nothing. It's just a question mark |
 | 📍 | **Ping** | <kbd>⌥</kbd> + click | Animation and sound only |
 
 > These are just defaults. What each signal does is up to you in Settings.
+
+## ✅ Todo panel
+
+Ping On My Way and the todo panel slides in from the right. Each todo remembers the app, window and web page you were on; click to go back.
+
+- **Priority**: high / medium / low, shown as a colour bar; the list sorts by priority, then due date
+- **Due dates**: today / tomorrow / next Monday in one click, or pick from a calendar, optionally with a time; overdue turns red, due today orange
+- **Reminders**: a notification at the due time, or 9:00 on the day for date-only todos; clicking it opens the panel
+- **Quick syntax**: `Send report !high @fri18:00` and Return (`!high !med !low`, `@today @tomorrow @mon…@sun @nextweek @10-20 @18:00`)
 
 ## 🧩 Custom actions
 
@@ -219,7 +228,7 @@ ping-signals.app/Contents/MacOS/ping-signals --render-settings <dir>
 - [x] Custom actions: shortcuts, keys, apps / URLs, shell
 - [x] Settings window, first-launch guide, launch at login, English and Chinese
 - [x] First release, v0.1.0
-- [ ] More to do with the todo panel
+- [x] Todos: priority, due dates, quick syntax, reminders
 
 ## 🙏 Thanks
 
