@@ -13,6 +13,10 @@
 "Retreat" = "Retreat";
 "Todo Panel" = "Todo Panel";
 "Call Claude" = "Call Claude";
+"Call ChatGPT" = "Call ChatGPT";
+"Call Codex" = "Call Codex";
+"Codex desktop first; otherwise opens Codex on the web." = "Codex desktop first; otherwise opens Codex on the web.";
+"Desktop app first; otherwise opens chatgpt.com." = "Desktop app first; otherwise opens chatgpt.com.";
 "Run Shortcut" = "Run Shortcut";
 "Press Keys" = "Press Keys";
 "Open App or URL" = "Open App or URL";

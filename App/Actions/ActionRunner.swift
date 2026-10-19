@@ -7,15 +7,16 @@ import PingCore
 final class ActionRunner {
   private let builtIn: [ActionConfig.Kind: PingAction]
 
-  init(retreat: PingAction, todoPanel: PingAction, claude: PingAction) {
-    builtIn = [.retreat: retreat, .todoPanel: todoPanel, .claudeQuickEntry: claude]
+  init(retreat: PingAction, todoPanel: PingAction, chatGPT: PingAction, codex: PingAction, claude: PingAction) {
+    builtIn = [.retreat: retreat, .todoPanel: todoPanel, .chatGPT: chatGPT, .codex: codex,
+               .claudeQuickEntry: claude]
   }
 
   func run(_ config: ActionConfig, signal: PingSignal) {
     guard config.isEffective else { return }
     switch config {
     case .none: return
-    case .retreat, .todoPanel, .claudeQuickEntry:
+    case .retreat, .todoPanel, .chatGPT, .codex, .claudeQuickEntry:
       builtIn[config.kind]?.perform(signal)
     case .keystroke(let h):
       SyntheticInput.whenModifiersReleased { SyntheticInput.press(h) }

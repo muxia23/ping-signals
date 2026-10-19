@@ -2,7 +2,7 @@ import Foundation
 
 /// What placing a ping does beyond its animation and sound. User-configurable per ping.
 public enum ActionConfig: Equatable, Sendable, Codable {
-  case none, retreat, todoPanel, claudeQuickEntry
+  case none, retreat, todoPanel, chatGPT, codex, claudeQuickEntry
   /// Runs a Shortcuts.app shortcut by name.
   case shortcut(String)
   /// Presses a key combination; modifiers may be empty (e.g. F13).
@@ -13,7 +13,7 @@ public enum ActionConfig: Equatable, Sendable, Codable {
   case shell(String)
 
   public enum Kind: String, CaseIterable, Sendable, Identifiable {
-    case none, retreat, todoPanel, claudeQuickEntry, shortcut, keystroke, open, shell
+    case none, retreat, todoPanel, chatGPT, codex, claudeQuickEntry, shortcut, keystroke, open, shell
     public var id: String { rawValue }
   }
 
@@ -22,6 +22,8 @@ public enum ActionConfig: Equatable, Sendable, Codable {
     case .none: .none
     case .retreat: .retreat
     case .todoPanel: .todoPanel
+    case .chatGPT: .chatGPT
+    case .codex: .codex
     case .claudeQuickEntry: .claudeQuickEntry
     case .shortcut: .shortcut
     case .keystroke: .keystroke
@@ -36,6 +38,8 @@ public enum ActionConfig: Equatable, Sendable, Codable {
     case .none: .none
     case .retreat: .retreat
     case .todoPanel: .todoPanel
+    case .chatGPT: .chatGPT
+    case .codex: .codex
     case .claudeQuickEntry: .claudeQuickEntry
     case .shortcut: .shortcut("")
     case .keystroke: .keystroke(Hotkey(mods: [], vk: 0))
@@ -49,7 +53,7 @@ public enum ActionConfig: Equatable, Sendable, Codable {
     func filled(_ s: String) -> Bool { !s.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     switch self {
     case .none: return false
-    case .retreat, .todoPanel, .claudeQuickEntry: return true
+    case .retreat, .todoPanel, .chatGPT, .codex, .claudeQuickEntry: return true
     case .shortcut(let s), .open(let s), .shell(let s): return filled(s)
     case .keystroke(let h): return KeyMap.vkToKeyCode(h.vk) != nil
     }
@@ -64,6 +68,8 @@ public enum ActionConfig: Equatable, Sendable, Codable {
     case .none?: self = .none
     case .retreat?: self = .retreat
     case .todoPanel?: self = .todoPanel
+    case .chatGPT?: self = .chatGPT
+    case .codex?: self = .codex
     case .claudeQuickEntry?: self = .claudeQuickEntry
     case .shortcut?: self = .shortcut(try c.decode(String.self, forKey: .value))
     case .keystroke?: self = .keystroke(try c.decode(Hotkey.self, forKey: .value))
@@ -77,7 +83,7 @@ public enum ActionConfig: Equatable, Sendable, Codable {
     var c = encoder.container(keyedBy: Keys.self)
     try c.encode(kind.rawValue, forKey: .type)
     switch self {
-    case .none, .retreat, .todoPanel, .claudeQuickEntry: break
+    case .none, .retreat, .todoPanel, .chatGPT, .codex, .claudeQuickEntry: break
     case .shortcut(let s), .open(let s), .shell(let s): try c.encode(s, forKey: .value)
     case .keystroke(let h): try c.encode(h, forKey: .value)
     }
@@ -85,12 +91,12 @@ public enum ActionConfig: Equatable, Sendable, Codable {
 }
 
 public enum PingActions {
-  /// v2's fixed table: Danger retreats, On My Way opens the todo panel, Assist Me calls Claude.
+  /// Danger retreats, On My Way opens the todo panel, Assist Me calls ChatGPT.
   public static let defaults: [PingID: ActionConfig] = Dictionary(uniqueKeysWithValues: PingID.allCases.map { id in
     switch id {
     case .danger: (id, .retreat)
     case .omw: (id, .todoPanel)
-    case .assist: (id, .claudeQuickEntry)
+    case .assist: (id, .chatGPT)
     default: (id, .none)
     }
   })

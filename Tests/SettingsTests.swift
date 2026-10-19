@@ -81,6 +81,7 @@ import Testing
     var s = Settings()
     s.actions[.missing] = .shell("echo $PING_ID")
     s.actions[.danger] = ActionConfig.none
+    s.actions[.push] = .codex
     #expect(Settings.decodeLeniently(try JSONEncoder().encode(s)) == s)
   }
 
@@ -89,7 +90,7 @@ import Testing
     #expect(s.actions[.missing] == .shell("ls"))
     #expect(s.actions[.danger] == .retreat)      // unknown type → default
     #expect(s.actions[.omw] == .todoPanel)       // malformed → default
-    #expect(s.actions[.assist] == .claudeQuickEntry)  // missing → default
+    #expect(s.actions[.assist] == .chatGPT)  // missing → default
     #expect(s.actions.count == PingID.allCases.count)
   }
 
@@ -101,5 +102,18 @@ import Testing
     s.style = .modern
     store.save(s)
     #expect(SettingsStore(defaults: defaults).load().style == .modern)
+  }
+
+  @Test func savedAssistantChoicesArePreserved() {
+    let legacy = decode(#"{"actions":{"assist":{"type":"claudeQuickEntry"}}}"#)
+    #expect(legacy.actions[.assist] == .claudeQuickEntry)
+    let custom = decode(#"{"actions":{"assist":{"type":"shortcut","value":"My assistant"}}}"#)
+    #expect(custom.actions[.assist] == .shortcut("My assistant"))
+    let disabled = decode(#"{"actions":{"assist":{"type":"none"}}}"#)
+    #expect(disabled.actions[.assist] == ActionConfig.none)
+    let chatGPT = decode(#"{"actions":{"assist":{"type":"chatGPT"}},"volume":25}"#)
+    #expect(chatGPT.actions[.assist] == .chatGPT && chatGPT.volume == 25)
+    let both = decode(#"{"actions":{"assist":{"type":"chatGPT"},"missing":{"type":"codex"}},"volume":25}"#)
+    #expect(both.actions[.assist] == .chatGPT && both.actions[.missing] == .codex && both.volume == 25)
   }
 }

@@ -60,6 +60,12 @@ private struct ActionRow: View {
 
   @ViewBuilder private var parameter: some View {
     switch config.wrappedValue {
+    case .chatGPT:
+      Text("Desktop app first; otherwise opens chatgpt.com.")
+        .font(.caption).foregroundStyle(.secondary)
+    case .codex:
+      Text("Codex desktop first; otherwise opens Codex on the web.")
+        .font(.caption).foregroundStyle(.secondary)
     case .shortcut(let name):
       HStack(spacing: 4) {
         Picker("", selection: Binding { name } set: { config.wrappedValue = .shortcut($0) }) {

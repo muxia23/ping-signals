@@ -23,6 +23,8 @@ enum Names {
     case .none: String(localized: "Nothing")
     case .retreat: String(localized: "Retreat")
     case .todoPanel: String(localized: "Todo Panel")
+    case .chatGPT: String(localized: "Call ChatGPT")
+    case .codex: String(localized: "Call Codex")
     case .claudeQuickEntry: String(localized: "Call Claude")
     case .shortcut: String(localized: "Run Shortcut")
     case .keystroke: String(localized: "Press Keys")
@@ -31,4 +33,3 @@ enum Names {
     }
   }
 }
-

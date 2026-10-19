@@ -31,7 +31,7 @@ final class AppCoordinator {
       showOnboarding: { [weak self] in self?.onboarding.show() }))
     bus.register(PingEffectHandler(overlay: overlay, sound: sound) { [weak self] in self?.settings ?? Settings() })
     runner = ActionRunner(retreat: RetreatAction(), todoPanel: TodoPanelAction(panel: todoPanel),
-                          claude: ClaudeQuickEntryAction())
+                          chatGPT: ChatGPTAction(), codex: CodexAction(), claude: ClaudeQuickEntryAction())
     bus.register(ActionRouter(runner: runner) { [weak self] in self?.settings.actions ?? PingActions.defaults })
     reminders.onOpen = { [weak self] in self?.showTodoPanel() }
     todoStore.onChange = { [weak self] items in self?.reminders.sync(items) }
