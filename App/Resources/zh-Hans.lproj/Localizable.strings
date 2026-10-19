@@ -15,8 +15,6 @@
 "Call Claude" = "呼叫 Claude";
 "Call ChatGPT" = "呼唤 ChatGPT";
 "Call Codex" = "呼唤 Codex";
-"Codex desktop first; otherwise opens Codex on the web." = "优先打开 Codex 桌面版，未安装时打开网页版。";
-"Desktop app first; otherwise opens chatgpt.com." = "优先打开桌面版，未安装时打开网页版。";
 "Run Shortcut" = "运行快捷指令";
 "Press Keys" = "按快捷键";
 "Open App or URL" = "打开应用或网址";

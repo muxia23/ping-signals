@@ -7,9 +7,11 @@ import Testing
     PingSignal(ping: id, style: .classic, point: GesturePoint(0, 0), frontApp: nil, time: Date(), source: source)
   }
 
-  @Test func defaultsCallChatGPT() {
+  @Test func defaultsMatchV2() {
     let d = PingActions.defaults
-    #expect(d[.assist] == .chatGPT)
+    #expect(d[.assist] == .claudeQuickEntry)
+    #expect(PingActions.shouldAct(on: signal(.assist, .wheel), actions: d) == .claudeQuickEntry)
+    #expect(PingActions.shouldAct(on: signal(.assist, .click), actions: d) == .claudeQuickEntry)
     #expect(d[.omw] == .todoPanel)
     #expect(d[.danger] == .retreat)
     #expect(d.count == PingID.allCases.count)
@@ -21,8 +23,6 @@ import Testing
     #expect(PingActions.shouldAct(on: signal(.danger, .wheel), actions: a) == .retreat)
     #expect(PingActions.shouldAct(on: signal(.danger, .click), actions: a) == .retreat)
     #expect(PingActions.shouldAct(on: signal(.danger, .preview), actions: a) == nil)
-    #expect(PingActions.shouldAct(on: signal(.assist, .wheel), actions: a) == .chatGPT)
-    #expect(PingActions.shouldAct(on: signal(.assist, .preview), actions: a) == nil)
   }
 
   @Test func ineffectiveActionsDoNothing() {
@@ -38,16 +38,8 @@ import Testing
     #expect(PingActions.shouldAct(on: signal(.missing), actions: a) == .shell("say hi"))
   }
 
-  @Test func codexBindingActsWithoutChangingChatGPTDefault() {
-    var a = PingActions.defaults
-    a[.missing] = .codex
-    #expect(a[.assist] == .chatGPT)
-    #expect(PingActions.shouldAct(on: signal(.missing), actions: a) == .codex)
-    #expect(PingActions.shouldAct(on: signal(.missing, .preview), actions: a) == nil)
-  }
-
   @Test func codableRoundTrip() throws {
-    let all: [ActionConfig] = [.none, .retreat, .todoPanel, .chatGPT, .codex, .claudeQuickEntry, .shortcut("翻译"),
+    let all: [ActionConfig] = [.none, .retreat, .todoPanel, .claudeQuickEntry, .chatGPT, .codex, .shortcut("翻译"),
                                .keystroke(Hotkey(mods: [.command, .shift], vk: 0x41)), .open("https://x.y"), .shell("ls")]
     for c in all {
       let back = try JSONDecoder().decode(ActionConfig.self, from: JSONEncoder().encode(c))
@@ -59,5 +51,16 @@ import Testing
 
   @Test func blankPerKind() {
     for k in ActionConfig.Kind.allCases { #expect(ActionConfig.blank(k).kind == k) }
+  }
+
+  // ChatGPT and Codex are opt-in; previews must never execute either action.
+  @Test func customAssistantBindingsAreRespected() {
+    for action in [ActionConfig.chatGPT, .codex] {
+      var actions = PingActions.defaults
+      actions[.assist] = action
+      #expect(PingActions.shouldAct(on: signal(.assist, .wheel), actions: actions) == action)
+      #expect(PingActions.shouldAct(on: signal(.assist, .click), actions: actions) == action)
+      #expect(PingActions.shouldAct(on: signal(.assist, .preview), actions: actions) == nil)
+    }
   }
 }

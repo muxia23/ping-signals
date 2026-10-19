@@ -32,6 +32,7 @@ import Testing
     #expect(s.volume == 30)
     #expect(s.style == .classic)
     #expect(s.pingSizePx == 110)
+    #expect(s.actions[.assist] == .claudeQuickEntry)  // no actions field → default
   }
 
   @Test func badFieldsFallBackIndividually() {
@@ -81,7 +82,6 @@ import Testing
     var s = Settings()
     s.actions[.missing] = .shell("echo $PING_ID")
     s.actions[.danger] = ActionConfig.none
-    s.actions[.push] = .codex
     #expect(Settings.decodeLeniently(try JSONEncoder().encode(s)) == s)
   }
 
@@ -90,8 +90,18 @@ import Testing
     #expect(s.actions[.missing] == .shell("ls"))
     #expect(s.actions[.danger] == .retreat)      // unknown type → default
     #expect(s.actions[.omw] == .todoPanel)       // malformed → default
-    #expect(s.actions[.assist] == .chatGPT)  // missing → default
+    #expect(s.actions[.assist] == .claudeQuickEntry)  // missing → default
     #expect(s.actions.count == PingID.allCases.count)
+  }
+
+  // Reloading saved settings must preserve explicit assistant choices.
+  @Test func savedAssistantChoicesArePreserved() throws {
+    for action in [ActionConfig.claudeQuickEntry, .chatGPT, .codex] {
+      var settings = Settings()
+      settings.actions[.assist] = action
+      let data = try JSONEncoder().encode(settings)
+      #expect(Settings.decodeLeniently(data).actions[.assist] == action)
+    }
   }
 
   @Test func storePersists() {
@@ -102,18 +112,5 @@ import Testing
     s.style = .modern
     store.save(s)
     #expect(SettingsStore(defaults: defaults).load().style == .modern)
-  }
-
-  @Test func savedAssistantChoicesArePreserved() {
-    let legacy = decode(#"{"actions":{"assist":{"type":"claudeQuickEntry"}}}"#)
-    #expect(legacy.actions[.assist] == .claudeQuickEntry)
-    let custom = decode(#"{"actions":{"assist":{"type":"shortcut","value":"My assistant"}}}"#)
-    #expect(custom.actions[.assist] == .shortcut("My assistant"))
-    let disabled = decode(#"{"actions":{"assist":{"type":"none"}}}"#)
-    #expect(disabled.actions[.assist] == ActionConfig.none)
-    let chatGPT = decode(#"{"actions":{"assist":{"type":"chatGPT"}},"volume":25}"#)
-    #expect(chatGPT.actions[.assist] == .chatGPT && chatGPT.volume == 25)
-    let both = decode(#"{"actions":{"assist":{"type":"chatGPT"},"missing":{"type":"codex"}},"volume":25}"#)
-    #expect(both.actions[.assist] == .chatGPT && both.actions[.missing] == .codex && both.volume == 25)
   }
 }

@@ -29,7 +29,7 @@ Hold <kbd>⌥</kbd> and drag to summon the wheel. Let go to send a signal. Every
 <td width="33%" valign="top">
 
 #### 🎯 Signals, not emotes
-Danger retreats to a clean desktop. On My Way slides in a todo list. Assist Me calls ChatGPT.
+Danger retreats to a clean desktop. On My Way slides in a todo list. Assist Me calls Claude.
 
 </td>
 <td width="33%" valign="top">
@@ -55,17 +55,11 @@ Native Swift. About 25 MB of memory and under 0.2% CPU at idle, and a download u
 |:---:|---|:---:|---|
 | ❗ | **Danger** | ↑ | **Retreat**: hides every window, leaving the wallpaper, Dock and menu bar. Ping again and everything comes back |
 | ⬇️ | **On My Way** | → | **Todo panel**: slides in from the right, ready to type. Records the app, window title and web page you were on; click to jump back. Priorities, due dates and reminders |
-| 🚩 | **Assist Me** | ↓ | **Call ChatGPT**: opens the ChatGPT desktop app, or the web app if unavailable |
+| 🚩 | **Assist Me** | ↓ | **Call Claude**: opens Claude desktop's Quick Entry |
 | ❓ | **Enemy Missing** | ← | Nothing. It's just a question mark |
 | 📍 | **Ping** | <kbd>⌥</kbd> + click | Animation and sound only |
 
 > These are just defaults. What each signal does is up to you in Settings.
-
-**Call ChatGPT** opens a new chat in ChatGPT mode in the current desktop app, or activates the main window in ChatGPT Classic. If the desktop app is missing or fails to launch, it opens `https://chatgpt.com/`. No API key is needed; no clipboard content is read and no message is sent automatically. It does not simulate a global keyboard shortcut that the user may have remapped.
-
-**Call Codex** is a separate choice in each action menu. It opens the new-task screen in Codex mode in the unified ChatGPT desktop app, or activates standalone Codex. If the desktop app is missing or fails to launch, it opens `https://chatgpt.com/codex`. It does not send a message or start work automatically. Assist Me still defaults to ChatGPT; bind Codex to another ping to keep both available.
-
-Existing action bindings are preserved on upgrade. To change an existing Claude binding, choose **Settings → Actions → Assist Me → Call ChatGPT**, then click **Try**. Other pings are unchanged.
 
 ## ✅ Todo panel
 
@@ -86,11 +80,16 @@ Bind any ping to any of these, and check it right away with **Try**:
 
 | Action | What you provide |
 |---|---|
-| Retreat · Todo Panel · Call ChatGPT · Call Codex · Call Claude | Nothing, built in |
+| Retreat · Todo Panel · Call Claude | Nothing, built in |
+| **Call ChatGPT · Call Codex** | Nothing, built in; select from the action dropdown |
 | **Run Shortcut** | One of your Shortcuts |
 | **Press Keys** | A recorded key combination, e.g. to summon Raycast or take a screenshot |
 | **Open App or URL** | A web address, any `scheme://` link, or an app you pick |
 | **Run Shell Command** | One command line, run with `zsh -l` |
+
+In **Settings → Actions**, bind any ping to **Call ChatGPT** or **Call Codex**. Assist Me still calls Claude by default, and existing custom bindings are preserved.
+
+Both actions try the desktop app first, with support for ChatGPT Classic and standalone Codex respectively. If no suitable app is found or macOS reports a launch failure, they open the [ChatGPT](https://chatgpt.com/) or [Codex](https://chatgpt.com/codex) website respectively. Opening a specific mode in the desktop app depends on the app version. Neither action requires an API key, reads the clipboard, passes the current app context, automatically sends messages, or executes tasks.
 
 <details>
 <summary><b>Context passed to shortcuts and shell commands</b></summary>
@@ -230,7 +229,7 @@ ping-signals.app/Contents/MacOS/ping-signals --render-settings <dir>
 ## 🗺️ Roadmap
 
 - [x] Classic and modern wheels with animation and sound
-- [x] Signal actions: Retreat, todo panel, call ChatGPT, call Codex (Claude remains available)
+- [x] Signal actions: Retreat, todo panel, call Claude
 - [x] Custom actions: shortcuts, keys, apps / URLs, shell
 - [x] Settings window, first-launch guide, launch at login, English and Chinese
 - [x] First release, v0.1.0
