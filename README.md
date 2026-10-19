@@ -87,10 +87,6 @@
 | **打开应用或网址** | 一个网址、`xxx://` 链接，或直接选一个应用 |
 | **运行 Shell 命令** | 一行命令，用 `zsh -l` 执行 |
 
-在「设置 → 动作」中，可以为任意信号选择「呼唤 ChatGPT」或「呼唤 Codex」。「请求协助」的默认动作仍是 Claude，已有的自定义绑定也会保留。
-
-两个动作优先尝试打开对应的桌面应用，分别兼容 ChatGPT Classic 和独立 Codex；找不到适用应用或系统报告打开失败时，分别打开 [ChatGPT](https://chatgpt.com/) 和 [Codex](https://chatgpt.com/codex) 网页。桌面版能否进入指定模式取决于应用版本。这两个动作无需 API Key，不读取剪贴板或传递当前应用上下文，也不会自动发送消息或执行任务。
-
 <details>
 <summary><b>快捷指令和 Shell 能拿到的上下文</b></summary>
 
