@@ -81,10 +81,15 @@ Bind any ping to any of these, and check it right away with **Try**:
 | Action | What you provide |
 |---|---|
 | Retreat · Todo Panel · Call Claude | Nothing, built in |
+| **Call ChatGPT · Call Codex** | Nothing, built in; select from the action dropdown |
 | **Run Shortcut** | One of your Shortcuts |
 | **Press Keys** | A recorded key combination, e.g. to summon Raycast or take a screenshot |
 | **Open App or URL** | A web address, any `scheme://` link, or an app you pick |
 | **Run Shell Command** | One command line, run with `zsh -l` |
+
+In **Settings → Actions**, bind any ping to **Call ChatGPT** or **Call Codex**. Assist Me still calls Claude by default, and existing custom bindings are preserved.
+
+Both actions try the desktop app first, with support for ChatGPT Classic and standalone Codex respectively. If no suitable app is found or macOS reports a launch failure, they open the [ChatGPT](https://chatgpt.com/) or [Codex](https://chatgpt.com/codex) website respectively. Opening a specific mode in the desktop app depends on the app version. Neither action requires an API key, reads the clipboard, passes the current app context, automatically sends messages, or executes tasks.
 
 <details>
 <summary><b>Context passed to shortcuts and shell commands</b></summary>

@@ -32,6 +32,7 @@ import Testing
     #expect(s.volume == 30)
     #expect(s.style == .classic)
     #expect(s.pingSizePx == 110)
+    #expect(s.actions[.assist] == .claudeQuickEntry)  // no actions field → default
   }
 
   @Test func badFieldsFallBackIndividually() {
@@ -91,6 +92,16 @@ import Testing
     #expect(s.actions[.omw] == .todoPanel)       // malformed → default
     #expect(s.actions[.assist] == .claudeQuickEntry)  // missing → default
     #expect(s.actions.count == PingID.allCases.count)
+  }
+
+  // Reloading saved settings must preserve explicit assistant choices.
+  @Test func savedAssistantChoicesArePreserved() throws {
+    for action in [ActionConfig.claudeQuickEntry, .chatGPT, .codex] {
+      var settings = Settings()
+      settings.actions[.assist] = action
+      let data = try JSONEncoder().encode(settings)
+      #expect(Settings.decodeLeniently(data).actions[.assist] == action)
+    }
   }
 
   @Test func storePersists() {
